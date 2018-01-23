@@ -1,0 +1,509 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="Web_App_Master.SiteMaster" %>
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%: Page.Title %> - Web Asset Portal</title>
+    <webopt:bundlereference runat="server" path="~/Content/css" />
+    <link href="Content/screen.css"/ rel="stylesheet"  >
+	<link href="Content/metro.css" rel="stylesheet" />
+    <script type="text/javascript" src='<%= ResolveClientUrl("Scripts/jquery-1.11.0.min.js") %>'></script>
+	<script type="text/javascript" src='<%= ResolveClientUrl("Scripts/metro.js") %>'></script>
+    <script type="text/javascript" src='<%= ResolveClientUrl("Scripts/webapp.js") %>'></script>
+    <script type="text/javascript">
+           $(document).ready(function () {
+
+               // define our variables
+               var fullHeightMinusHeader, sideScrollHeight = 0;
+
+               // create function to calculate ideal height values
+               function calcHeights() {
+
+                   // set height of main columns
+                   fullHeightMinusHeader = jQuery(window).height() - jQuery(".app-header").outerHeight();
+                   jQuery(".main-content, .sidebar-one").height(fullHeightMinusHeader);
+                   // set height of sidebar scroll content
+                   jQuery(".settings-scroll").height(fullHeightMinusHeader-53);
+                   sideScrollHeight = (fullHeightMinusHeader / 2) - 6;
+                   jQuery(".side-scroll").height(sideScrollHeight);
+
+               } // end calcHeights function
+
+               // run on page load    
+               calcHeights();
+
+               // run on window resize event
+               $(window).resize(function () {
+                   calcHeights();
+               });
+
+           });
+
+    </script>
+   
+    <script type="text/javascript">
+        
+        function BarcodeScanned(num) {
+            $.ajax({
+                type: 'POST',
+                url: '<%= Page.ResolveUrl("~/Account/AssetController.aspx/GetAsset")%>',
+                data: "{num:" + num + "}",
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: AssetSuccess,
+                error: AssetFailure
+
+            });
+        };
+        
+        
+    </script>
+     <script type="text/javascript">
+         document.ASSET = null;
+         document.currentAsset = "0000";
+         document.currentBarcodeSequence = "";
+         document.lastKeypress = new Date();
+         var monitorBarcodes = function (e) {
+             //technically a logger but we will not store all strokes...just capture superfast input and escape key
+
+             //sequenceLimitMs should be set as low as possible to prevent capture of human keyed numbers.
+             //200 allow testing without a barcode scanner, you could try a value of 50 with a scanner.
+             var sequenceLimitMs = 200;
+             var now = new Date();
+             var elapsed = now - document.lastKeypress;
+             document.lastKeypress = now;
+             //capture escape
+             if (e.charCode == 27) {
+                 hideMetroCharm('#assets');
+                 hideMetroCharm('#settings-charm');
+                 hideMetroCharm('#assetview-charm');
+             }
+             //only 0-9
+             if (e.charCode >= 48 && e.charCode <= 57) {
+                 //pressed key is a number
+                 if (elapsed < sequenceLimitMs || document.currentBarcodeSequence === "") {
+                     //event is part of a barcode sequence
+                     document.currentBarcodeSequence += (e.charCode - 48);
+
+                     if (document.currentBarcodeSequence.length > 1) {
+                         clearTimeout(document.printBarcodeTimeout);
+                         document.printBarcodeTimeout = setTimeout("setBarcode()", sequenceLimitMs + 10);
+                     }
+                 } else {
+                     document.currentBarcodeSequence = "" + (e.charCode - 48);
+                     clearTimeout(document.printBarcodeTimeout);
+                 }
+             } else {
+                 document.currentBarcodeSequence = "";
+                 clearTimeout(document.printBarcodeTimeout);
+             }
+         }
+         var setBarcode = function () {
+             var barcodeInput = document.getElementById("BarcodeSearchBox");
+             if (barcodeInput != null) //user not logged in yet
+             {
+                 barcodeInput.value = document.currentBarcodeSequence;   
+                 //change icon to searching id="barcodeIcon" class="glyphicon glyphicon-barcode"
+                 var NAME = document.getElementById("barcodeIcon");
+                 if (NAME != null) 
+                 {
+                     NAME.className = "glyphicon glyphicon-refresh normal-right-spinner";   // Set other class name
+                 }
+                 //fire off ajax call for auto search here
+                 document.currentAsset = document.currentBarcodeSequence;
+                 BarcodeScanned(document.currentBarcodeSequence);
+             } else
+             {
+                 alert("Please login to use Asset Scanner");
+             }
+             
+         }
+
+         window.onkeypress = monitorBarcodes;
+</script>
+</head>
+    <body style="">
+	    <form id="form1" runat="server" style="height:100%">
+       <!-- app-header -->
+            <asp:ScriptManager ID="ScriptManager1" runat="server" AjaxFrameworkMode="Enabled" EnablePageMethods="true">
+
+            </asp:ScriptManager>
+            
+	<div class="app-header">
+		<div class="app-bar" data-role="appbar">
+            <asp:LoginView ID="brandSpot" runat="server" ViewStateMode="Disabled">
+                <AnonymousTemplate>
+                    <a class="app-bar-element branding" ><i class="glyphicon glyphicon-globe"></i><strong>Asset Web Portal</strong></a>
+                </AnonymousTemplate>
+                <LoggedInTemplate>
+                    <a class="app-bar-element branding" onclick="toggleMetroCharm('#assets')"><i class="glyphicon glyphicon-retweet"></i><strong>&nbsp;Tasks</strong></a>
+                </LoggedInTemplate>
+</asp:LoginView>
+                    
+                    <span class="app-bar-divider"></span>
+                    <ul class="app-bar-menu small-dropdown">
+                        <asp:LoginView runat="server" ID="flexer" EnableViewState="false">
+                            <AnonymousTemplate>
+                                <li data-flexorderorigin="0" data-flexorder="1"><a runat="server" href="~/"><i class="glyphicon glyphicon-home"></i>&nbsp;Home</a></li>
+                             
+                            </AnonymousTemplate>
+                            <LoggedInTemplate>
+                                <li data-flexorderorigin="0" data-flexorder="1"><a runat="server" href="~/"><i class="glyphicon glyphicon-home"></i>&nbsp;Home</a></li>
+                        <li data-flexorderorigin="1" data-flexorder="2">
+                          <a runat="server" href="Account/AssetView.aspx"><i class="glyphicon glyphicon-dashboard"></i>&nbsp;DashBoard</a>
+                        </li>     
+                                <li data-flexorderorigin="2" data-flexorder="3">
+                                    <div class="input-control" data-role="input" style="vertical-align:top">
+                                        <input id="BarcodeSearchBox" type="number" style="width:130px;"  onkeypress="parsesearch()" />
+                            <button class="button" id="BarcodeButton" type="button"><i id="barcodeIcon" class="glyphicon glyphicon-barcode"></i></button>
+                                       
+                        </div>
+                                     <input id="Checkbox1" type="checkbox"style="vertical-align:middle" /><i class="glyphicon glyphicon-check" style="padding-left:5px"></i>
+                        </li>     
+                            </LoggedInTemplate>
+                        </asp:LoginView>
+
+
+                    </ul>
+
+                    <!--Right Side Logged In Menu Items-->
+            <asp:LoginView ID="notifyView" EnableViewState="false" runat="server">
+                <AnonymousTemplate>
+
+                </AnonymousTemplate>
+                <LoggedInTemplate>
+                    <ul class="app-bar-menu small-dropdown place-right">
+                     <li data-flexorderorigin="0" data-flexorder="1" class="">
+                            <a class="dropdown-toggle"><i class="glyphicon glyphicon-bell"></i></a>
+                            <ul class="d-menu place-right ShowScroll" data-role="dropdown" style="display: none;width:250px;height:300px; z-index:50000; opacity: 0.68;filter: alpha(opacity=68);">
+                                <!--Repeater for notifications NON OVERFLOW SCROLLABLE CONTAINER-->
+                                
+                                    <div id="ActiveNoticeContainer">
+                                        
+                                     
+                                    <!--Dynamic notices here-->
+
+                                    </div>
+
+                                
+                               
+                            </ul>
+                        </li>
+              <li data-flexorderorigin="1" data-flexorder="2" class="">
+                            <a  onclick="toggleMetroCharm('#settings-charm')" ><i class="glyphicon glyphicon-cog"></i></a>
+                            
+                        </li>
+
+             </ul>
+                </LoggedInTemplate>
+            </asp:LoginView>
+                     <!--  End Right Items-->
+
+
+                    <div class="app-bar-element place-right active-container">
+                        <asp:LoginView runat="server" ID="dropMenu" ViewStateMode="Disabled">
+                            <AnonymousTemplate>                                              
+
+                        <a class="dropdown-toggle fg-white"><i class="glyphicon glyphicon-user"></i> Enter</a>
+
+                            </AnonymousTemplate>
+                            <LoggedInTemplate>
+
+                        <a class="dropdown-toggle fg-white" style="text-decoration: none"><i class="glyphicon glyphicon-user"></i> </a>
+
+                            </LoggedInTemplate>
+                        </asp:LoginView>
+                       
+                        <div class="app-bar-drop-container place-right" data-role="dropdown" data-no-close="true" style="display: none;">
+                            <div class="padding20 fg-dark">
+                                
+<asp:LoginView runat="server" ID="topbarloginview" ViewStateMode="Disabled">
+                        <AnonymousTemplate>
+                        <div>
+                             <a runat="server" href="~/Account/Register">Register</a>
+                             <a runat="server" href="~/Account/Login">Log in</a>
+                        </div>
+                        </AnonymousTemplate>
+                        <LoggedInTemplate>
+                            
+                         <h4 class="text-light"><a runat="server" href="~/Account/Manage" title="Manage your account">Manage Account</a></h4>
+                         <h4 class ="text-light"><asp:LoginStatus runat="server" LogoutAction="Redirect" LogoutText="Log off" LogoutPageUrl="~/" OnLoggingOut="Unnamed_LoggingOut" /></h4>
+                        </LoggedInTemplate>
+                    </asp:LoginView>
+                                
+                            </div>
+                        </div>
+                    </div>
+                <div class="app-bar-pullbutton automatic" style="display: none;"></div><div class="clearfix" style="width: 0;"></div><nav class="app-bar-pullmenu hidden flexstyle-app-bar-menu" style="display: none;"><ul class="app-bar-pullmenubar hidden app-bar-menu"></ul></nav></div>
+
+        
+	</div><!-- /app-header -->
+
+         
+
+
+	
+	
+
+	
+ 
+     
+            <!-- main-content -->
+	 <div class="main-content " style="height: 618px;">
+		
+		<!-- main-content-inner -->
+		<div class="main-content-inner">
+			
+			<asp:ContentPlaceHolder ID="MainContent" runat="server" Visible="true">
+            </asp:ContentPlaceHolder>
+		</div><!-- /main-content-inner -->
+		
+	</div><!-- /main-content -->
+    
+     	
+<!-- CHARMS -->
+	<div class="sidebar-one" style="height: 618px; z-index:50000;" data-role="charm" data-position="left" id="assets">
+	
+                        
+                       
+                            	
+         <div class="side-scroll" style="height: 50%;">
+             <div><h1>Checkin</h1><span class="charm-closer"></span></div>
+
+			<!-- side-scroll-inner -->
+			<div class="side-scroll-inner">
+                
+                <div id="ActiveCheckinContainer">
+                                    <!--Dynamic notices here-->
+
+                </div>
+			</div><!-- /side-scroll-inner -->
+
+		</div><!-- /side-scroll -->
+
+
+		<!-- side-scroll -->
+		<div class="side-scroll2" style="height:50%;">
+            
+			<!-- side-scroll-inner -->
+			<div class="side-scroll2-inner">
+                 <div><h1>Checkout</h1></div>
+                <asp:UpdatePanel runat="server" ID="CheckoutUpdatePanel" UpdateMode="Conditional" ChildrenAsTriggers="true">
+            <ContentTemplate>                
+               <asp:Label ID="label" runat="server"></asp:Label>
+                <asp:Repeater runat="server" ID ="CheckoutRepeater" ClientIDMode="Static" >                    
+                    <ItemTemplate> 
+             <div class="tile tile-small-y bg-metro-light" data-role="tile"  onclick=" BarcodeScanned('<%# Eval("AssetNumber")%>');">
+                <div class="tile-content bg-metro-light" >
+                    <div class="image-container bg-metro-light" style="margin-top:25px">
+                        <div class="frame">
+                            <img src="<%# Eval("FirstImage")%>">
+                        </div>
+                        <div class="image-overlay op-green">
+                            <div style="vertical-align:top; text-align:left"><%# Eval("Description")%></div>
+                                
+                        </div>
+                    </div>
+                    <span class="tile-badge fg-white bg-darkRed"><strong><%# Eval("AssetNumber")%></strong></span>
+                    <div class="tile-label fg-white shadow-metro-black"><strong><%# Eval("ItemName")%></strong></div>
+                </div>
+            </div>
+                    </ItemTemplate>
+                    
+                </asp:Repeater>
+            </ContentTemplate>
+            <Triggers>
+               <asp:AsyncPostBackTrigger ControlID="button33" EventName="Click" />
+            </Triggers>
+         </asp:UpdatePanel>
+                <div id="ActiveCheckoutContainer">
+                                    <!--Dynamic notices here-->
+
+                </div>
+			</div><!-- /side-scroll2-inner -->
+
+		</div><!-- /side-scroll2 -->
+              
+		
+
+	</div>
+
+
+    <!--ASSET CHARM  -->
+    <div data-role="charm" data-position="right" id="assetview-charm" class="charm right-side" style="opacity: 1; display: block; right: 0px; left: auto; top: 50px; bottom: 0px; min-width:100%; width:100%; z-index:40000" >
+                <!--ASSET MENU-->
+<div class="app-bar bg-metro" style="margin-top:0px !important;">
+    
+    <ul class="app-bar-menu">
+        <li><h1>Asset View</h1> </li>
+        <li>&nbsp;<i title="Add To Task List"  style="font-size:2.5em;" id="InOutBtn" class="glyphicon glyphicon-plus c-lime" onclick=""></i>&nbsp;</li>
+       
+        
+        
+    </ul>
+   
+</div>
+                <!--TABS-->
+                <div class="tabs  bg-metro">
+    <!--Asset Tab-->
+   <div class="tab">
+       <input type="radio" id="tab-1" name="tab-group-1" checked>
+       <label for="tab-1">Asset</label>       
+       <div class="content ShowScroll bg-metro">
+           <div class="row bg-metro fg-white ">
+                    <div class="col-md-10">
+                        <span>Asset Name</span>
+                        <div class=" input-control text "><input id="av-AssetName" type="text" class="av-input" placeholder="Name" /></div>
+                        
+                    </div>
+                    <div class="col-md-2">
+                        <span>Asset Number</span>
+                        <div class=" input-control text "><input id="av-AssetNumber" type="text" class="av-input" placeholder="0000" /></div>
+                   </div>
+           </div>
+           <div class="row bg-metro fg-white">
+                   <div class="col-md-4">
+                        <span>Ship To</span>
+                        <div class=" input-control text "><input id="av-ShipTo" type="text" class="av-input" placeholder="Ship to" /></div>
+                   </div>
+               <div class="col-md-4">
+                        <span>Service Order</span>
+                        <div class=" input-control text "><input id="av-ServiceOrder" type="text" class="av-input" placeholder="Service Order Number" /></div>
+                   </div>
+               <div class="col-md-4">
+                        <span>Date Shipped</span>
+                        <div class=" input-control text "><input id="av-DateShipped" type="text" class="av-input" placeholder="Date Shipped" /></div>
+                   </div>
+          </div>
+           <div class="row bg-metro fg-white">
+                   <div class="col-md-4">
+                        <span>Service Engineer</span>
+                        <div class=" input-control text "><input id="av-ServiceEngineer" type="text" class="av-input" placeholder="" /></div>
+                   </div>
+               <div class="col-md-4">
+                        <span>Person Shipping</span>
+                        <div class=" input-control text "><input id="av-PersonShipping" type="text" class="av-input" placeholder="" /></div>
+                   </div>
+               <div class="col-md-4">
+                        <span>Date Received</span>
+                        <div class=" input-control text "><input id="av-DateRecieved" type="text" class="av-input" placeholder="Date Recieved" /></div>
+                   </div>
+          </div>
+           <div class="row bg-metro fg-white">
+                   <div class="col-md-3">
+                        <span>Weight (lbs)</span>
+                        <div class=" input-control text "><input id="av-Weight" type="text" class="av-input"  /></div>
+                   </div>
+               <div class="col-md-3">
+                        <span>Damaged</span>
+                        <div class=" input-control text "><input id="av-Damaged" type="checkbox" class="av-input"/></div>
+                   </div>
+               <div class="col-md-3">
+                        <span>Calibrated tool</span>
+                        <div class=" input-control text "><input id="av-CalibratedTool" type="checkbox" class="av-input"  /></div>
+                   </div>
+               <div class="col-md-3">
+                        <span>On Hold</span>
+                        <div class=" input-control text "><input id="av-OnHold" type="checkbox" class="av-input" /></div>
+                   </div>
+          </div>
+           <div class="row bg-metro fg-white">
+               <div class="col-md-12">
+                   <span>Description</span>
+                   <div class=" input-control textarea av-input"><textarea id="av-Description" ></textarea></div>
+               </div>
+           </div>           
+       </div> 
+   </div>
+   <!-- Image Tab-->
+   <div class="tab">
+       <input type="radio" id="tab-5" name="tab-group-1">
+       <label for="tab-5">Images</label>     
+       <div class="content bg-metro" style="margin-bottom:120px !important; text-align:center; border:none !important;">
+           <div class="row">
+               <a href="#" class=" round-button" onclick="PrevAssetImg()" >
+                  <span class="glyphicon glyphicon-circle-arrow-left"></span>
+               </a>
+               <a href="#" class=" round-button" onclick="NextAssetImg()" >
+                  <span class="glyphicon glyphicon-circle-arrow-right"></span>
+               </a>
+               
+           </div>
+               <input type="hidden" id="av_imgidx"  value="0"/>   
+           <input type="hidden" id="av_imgs"  value=""/>
+               <img id="avSlideShow" class="border-metro rounded"  src='<%= ResolveUrl("~/Account/Images/00010.JPG")%>' style=" height:100%;"></img>
+             
+          
+       </div> 
+   </div>
+    <!-- Reports Tab-->
+   <div class="tab">
+       <input type="radio" id="tab-2" name="tab-group-1">
+       <label for="tab-2">Labels & Reports</label>       
+       <div class="content bg-metro ShowScroll">
+
+       </div> 
+   </div>
+    <!-- Calibration Tab-->
+    <div class="tab">
+       <input type="radio" id="tab-3" name="tab-group-1">
+       <label for="tab-3">Calibration</label>
+     
+       <div class="content bg-metro ShowScroll">
+
+       </div> 
+   </div>
+<!-- History Tab-->
+   <div class="tab">
+       <input type="radio" id="tab-4" name="tab-group-1">
+       <label for="tab-4">History</label>
+     
+       <div class="content bg-metro ShowScroll">
+
+       </div> 
+   </div>
+
+</div>
+
+                      <!--END TABS-->
+              </div>
+
+<!-- /CHARMS-->
+    
+                        <asp:Button ID="button33" runat="server" Text="CLICK ME" OnClick="button33_Click" style="display:none" ClientIDMode="Static"/>
+
+            <!--Settings Charm-->
+    <div data-role="charm" data-position="right" id="settings-charm" class="charm right-side" style="opacity: 1; display: block; right: 0px; left: auto; top: 50px; bottom: 0px; min-width:100%; width:100%;">
+        <h1 class="text-light">Settings</h1><span class="charm-closer"></span>
+        <div class="settings-scroll fg-white" >
+            <div class="side-scroll-inner">
+                <!--settings -->
+                <div class="row bg-metro">
+                    <asp:LoginView ID="SETTINGLOGINVIEW" EnableViewState="false" ClientIDMode="Static" runat="server">
+                        <AnonymousTemplate>
+
+                        </AnonymousTemplate>
+                        <LoggedInTemplate>
+                    <h1><strong>Assets</strong></h1>                           
+                    <a href=' <%=ResolveUrl("Account/STUS.aspx")%>' class="fg-white">Settings</a>
+                        </LoggedInTemplate>
+                    </asp:LoginView>
+                    
+                </div>
+                </div>
+        </div>
+
+    </div>
+          <!--End settings Charm-->
+
+             
+          </form>
+
+</body>
+
+</html>
