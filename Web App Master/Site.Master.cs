@@ -11,6 +11,8 @@ using Helpers;
 using System.Xml;
 using System.Linq;
 using Web_App_Master.Account;
+using System.IO;
+using static Notification.NotificationSystem;
 
 namespace Web_App_Master
 {
@@ -41,6 +43,12 @@ namespace Web_App_Master
             catch { }
             try
             {
+                BindCalibration();
+                CalibrationUpdatePanel.Update();
+            }
+            catch { }
+            try
+            {
                 BindCheckin();
                 CheckInUpdatePanel.Update();
             }
@@ -63,6 +71,19 @@ namespace Web_App_Master
             catch { }
            
         }
+
+        private void BindCalibration()
+        {
+            try
+            {
+                var asset = Session["CurrentAsset"] as Asset;
+
+                CalibrationRepeater.DataSource = asset.CalibrationHistory.Calibrations;
+                CalibrationRepeater.DataBind();
+            }
+            catch { }
+        }
+
         public List<Asset> LocalAssets { get; set; }
         public bool Loggedin { get; set; }
         public XmlDocument LocalXmlLibrary { get; set; }
@@ -163,6 +184,7 @@ namespace Web_App_Master
         {
             return new List<Asset>() { new Asset() { AssetName="None", AssetNumber="0000" } };
         }
+        public bool IsAutoChecked = false;
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -174,6 +196,21 @@ namespace Web_App_Master
             AssetHistoryRepeater.HeaderTemplate = Page.LoadTemplate("/Account/Templates/av_history_header_template.ascx");
             AssetHistoryRepeater.ItemTemplate = Page.LoadTemplate("/Account/Templates/av_history_template.ascx");
             AssetHistoryRepeater.FooterTemplate = Page.LoadTemplate("/Account/Templates/av_history_footer_template.ascx");
+            var ud = Session["PersistingUserData"] as Data.UserData;
+            if (ud != null)
+            {
+                if (ud.IsAutoChecked)
+                {
+                    var cb = flexer.FindControl("BarcodeCheckBox") as CheckBox;
+                    cb.Checked = true;
+                }
+                else
+                {
+                    var cb = flexer.FindControl("BarcodeCheckBox") as CheckBox;
+                    cb.Checked = false;
+                }
+            }
+
         }
 
         private void SiteMaster_PreRender(object sender, EventArgs e)
@@ -296,6 +333,99 @@ namespace Web_App_Master
                 AssetHistoryUpdatePanel.Update();
             }
             catch { }
+        }
+
+        protected void clearCheckIn_Click(object sender, EventArgs e)
+        {
+            Session["CheckIn"] = new List<Asset>();
+        }
+
+        protected void clearCheckout_Click(object sender, EventArgs e)
+        {
+            Session["CheckOut"] = new List<Asset>();
+        }
+
+        protected void UploadAssetCertificateBtn_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int test = Convert.ToInt32( CalPeriod.Value);
+            }
+            catch { return; }
+            if (CalCompany.Value == "") return;
+
+            var asset = Session["Asset"] as Asset;
+            var ext = Path.GetExtension(CertUpload.FileName);
+            if (ext == "")
+                ext = ".pdf";
+            var file = System.Guid.NewGuid().ToString();
+            var dest = Server.MapPath("/Account/Certs/"+ asset.AssetNumber+file+ext);
+            using (FileStream fs = new FileStream(dest, FileMode.Create))
+            {
+                CertUpload.FileContent.CopyTo(fs);
+            }
+            
+            try
+            {
+                CalibrationData cd = new CalibrationData();
+                cd.AssetNumber = asset.AssetNumber;
+                cd.CalibrationCompany= CalCompany.Value.Sanitize();
+                try {
+                   cd.SchedulePeriod=  Convert.ToInt32(CalPeriod.Value);
+                } catch { }
+                cd.ImagePath = "/Account/Certs/" + asset.AssetNumber + file + ext;
+               
+                asset.CalibrationHistory.Calibrations.Add(cd);                
+                Save.Asset(asset);
+
+                //ADD NOTIFICATION
+                try
+                {
+                    EmailNotice notice = new EmailNotice();
+
+                    notice.Scheduled = DateTime.Now.AddDays(30);
+                    notice.NoticeType = NoticeType.Calibration;
+                    notice.NoticeAction = Global.CalibrationAction;                   
+                    notice.NoticeControlNumber = asset.AssetNumber;                   
+                    notice.Body = Global.Library.Settings.CalibrationMessage;
+                    var statics = (from d in Global.Library.Settings.StaticEmails select d).ToList();
+                    EmailAddress person = new EmailAddress();
+                    if (statics.Count!=0)
+                    {
+                        person = statics.FirstOrDefault();
+                    }
+                    notice.Emails.AddRange(statics);
+                    notice.EmailAddress = person;
+                    notice.Scheduled = DateTime.Now.AddMonths(Convert.ToInt32(CalPeriod.Value)).AddDays(-14);
+                    Global.NoticeSystem.Add(notice);
+                    Save.NotificationSystem();
+                }
+                catch { }
+
+                //register startup script to hide cal uploader
+                BindCalibration();
+                Page.ClientScript.RegisterStartupScript(this.GetType(), "CallMyFunction", "HideCalUploader()", true);
+            }
+            catch
+            {
+
+            }
+        }
+
+        protected void SaveCalOptionsBtn_Click(object sender, EventArgs e)
+        {
+            var asset = Session["Asset"] as Asset;
+            asset.CalibrationCompany = CalCompany.Value.Sanitize();
+            DateTime tmp = DateTime.Now;
+          
+            asset.CalibrationPeriod = CalPeriod.Value;
+            Save.Asset(asset);
+            
+        }
+
+        protected void CalibrationBinderBtn_Click(object sender, EventArgs e)
+        {
+            BindCalibration();
         }
     }
     public class UpdateRequestEvent : EventArgs

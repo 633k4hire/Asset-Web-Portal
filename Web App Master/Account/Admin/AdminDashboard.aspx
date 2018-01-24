@@ -35,8 +35,7 @@
                 <input title="Test Mode" id="TestModeSwitch"  type="checkbox" checked="checked" onchange="TestModeChanged()">
                 <span class="check"></span>
             </label>                   
-            </span>
-        </li>
+            &nbsp;&nbsp;</span></li>
     </ul>
             </asp:PlaceHolder>
 </div>
@@ -517,19 +516,11 @@
        </asp:View>
         <asp:View ID ="NotificationsView" runat="server">
                 <div id="NotificationsBox"  class="row">
-        <div class="col-md-12">
-            <div class="awp_box rounded bg-metro-dark shadow">
-           
-                <div class="awp_box_title bg-metro-dark">
-                   <span class="fg-white shadow-metro-black">Notifications</span>
-                </div>
-                <div class="awp_box_content bg-metro-light">
-                   <div class="row">
-                        <div class="col-md-6">
+                    <div class="col-md-12">
                          <div class="awp_box rounded bg-metro-dark shadow">
            
                             <div class="awp_box_title bg-metro-dark">
-                               <span class="fg-white shadow-metro-black">30 Day</span>
+                               <span class="fg-white shadow-metro-black">Pending Notifications</span>
                             </div>
                             <div class="awp_box_content bg-metro-light">
                                 <!--Repeaters for 30 Day Notices-->
@@ -537,10 +528,10 @@
                                             <ItemTemplate>
                                                 <div class="row bg-metro">                                           
                                                         <div class="col-sm-12" style="width:auto !important; text-align:left">
-                                                            <asp:Button ToolTip="Delete Notice" ID="DeleteNotice30DayBtn" CssClass="btn btn-primary btn-sm" runat="server" Text="X" Font-Bold="true" CommandName='<%#Eval("AssetNumber")%>'  OnCommand="DeleteNotice30DayBtn_Command" />
-                                                            <asp:Button ToolTip="Send Notice" ID="SendNotice30DayBtn" CssClass="btn btn-primary btn-sm" runat="server" Text="Send" Font-Bold="true" CommandName='<%#Eval("AssetNumber")%>' OnCommand="SendNotice30DayBtn_Command" />
-                                                        <strong><%# Eval("AssetNumber")%></strong> - <strong><%# Eval("LastNotified").ToString()%></strong> - 
-                                                            <strong><%# Eval("EmailsCSV")%></strong>
+                                                            <asp:Button ToolTip="Delete Notice" ID="DeleteNotice30DayBtn" CssClass="btn btn-primary btn-sm" runat="server" Text="X" Font-Bold="true" CommandName='<%#Eval("NoticeControlNumber")%>' CommandArgument='<%#Eval("GUID")%>'  OnCommand="DeleteNotice30DayBtn_Command" />
+                                                            <asp:Button ToolTip="Send Notice" ID="SendNotice30DayBtn" CssClass="btn btn-primary btn-sm" runat="server" Text="Send" Font-Bold="true" CommandName='<%#Eval("NoticeControlNumber")%>' CommandArgument='<%#Eval("GUID")%>' OnCommand="SendNotice30DayBtn_Command" />
+                                                        <strong><%# Eval("NoticeControlNumber")%></strong> &nbsp-&nbsp Scheduled in&nbsp<strong><%# Eval("DaysUntil").ToString()%>&nbsp Days</strong> &nbsp-&nbsp 
+                                                            <strong><%# Eval("Name")%></strong>
                                                         </div>  
                                                         
                                                </div>
@@ -549,38 +540,9 @@
                                         </asp:Repeater>
                             </div>
                          </div>
-                       </div>
-                        <div class="col-md-6">
-                         <div class="awp_box rounded bg-metro-dark shadow">
-           
-                            <div class="awp_box_title bg-metro-dark">
-                               <span class="fg-white shadow-metro-black">15 Day</span>
-                            </div>
-                            <div class="awp_box_content bg-metro-light">
-                               <!--Repeaters for 15 Day Notices-->
-                                        <asp:Repeater ID="Notice15DayRepeater" ClientIDMode="Static" runat="server">
-                                            <ItemTemplate>
-                                                <div class="row bg-metro">                                           
-                                                        <div class="col-sm-6" style="width:auto !important; text-align:left !important">
-                                                            <asp:Button ToolTip="Delete Notice" ID="DeleteNotice15DayBtn" CssClass="btn btn-primary btn-sm" runat="server" Text="X" Font-Bold="true" CommandName='<%#Eval("AssetNumber")%>'  OnCommand="DeleteNotice15DayBtn_Command" />
-                                                            <asp:Button ToolTip="Send Notice" ID="SendNotice15DayBtn" CssClass="btn btn-primary btn-sm" runat="server" Text="Send" Font-Bold="true" CommandName='<%#Eval("AssetNumber")%>' OnCommand="SendNotice15DayBtn_Command" />
-                                                        <strong><%# Eval("AssetNumber")%></strong> - <strong><%# Eval("LastNotified").ToString()%></strong> <br />
-                                                            <strong><%# Eval("EmailsCSV")%></strong>
-
-                                                        </div>  
-                                               </div>
-                                     
-                                            </ItemTemplate>
-                                        </asp:Repeater>
-                            </div>
-                         </div>
-                       </div>
-
-                   </div>
+                       </div>       
+                     
                 </div>
-            </div>
-        </div>
-        </div>
 
        </asp:View>
     </asp:MultiView>

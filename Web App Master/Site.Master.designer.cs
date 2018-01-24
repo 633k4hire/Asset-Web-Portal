@@ -121,6 +121,15 @@ namespace Web_App_Master {
         protected global::System.Web.UI.WebControls.ContentPlaceHolder MainContent;
         
         /// <summary>
+        /// clearCheckIn control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton clearCheckIn;
+        
+        /// <summary>
         /// CheckInUpdatePanel control.
         /// </summary>
         /// <remarks>
@@ -146,6 +155,15 @@ namespace Web_App_Master {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater CheckInRepeater;
+        
+        /// <summary>
+        /// clearCheckout control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton clearCheckout;
         
         /// <summary>
         /// CheckoutUpdatePanel control.
@@ -337,6 +355,51 @@ namespace Web_App_Master {
         protected global::System.Web.UI.HtmlControls.HtmlIframe AssetReceivingReportFrame;
         
         /// <summary>
+        /// CalibrationUpdatePanel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.UpdatePanel CalibrationUpdatePanel;
+        
+        /// <summary>
+        /// CalibrationRepeater control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater CalibrationRepeater;
+        
+        /// <summary>
+        /// SaveCalOptionsBtn control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton SaveCalOptionsBtn;
+        
+        /// <summary>
+        /// CalCompany control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlInputText CalCompany;
+        
+        /// <summary>
+        /// CalPeriod control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlInputText CalPeriod;
+        
+        /// <summary>
         /// AssetHistoryUpdatePanel control.
         /// </summary>
         /// <remarks>
@@ -362,6 +425,15 @@ namespace Web_App_Master {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button HistoryBinderBtn;
+        
+        /// <summary>
+        /// CalibrationBinderBtn control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button CalibrationBinderBtn;
         
         /// <summary>
         /// button33 control.
@@ -398,5 +470,23 @@ namespace Web_App_Master {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button UploadAssetImg;
+        
+        /// <summary>
+        /// CertUpload control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.FileUpload CertUpload;
+        
+        /// <summary>
+        /// UploadAssetCertificateBtn control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button UploadAssetCertificateBtn;
     }
 }

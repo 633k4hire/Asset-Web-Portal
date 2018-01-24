@@ -96,7 +96,13 @@ public static class SQLfunc
             request.Command.Parameters.Add("@IsOut", SqlDbType.Bit).Value = asset.IsOut;
             request.Command.Parameters.Add("@BarcodeImage", SqlDbType.NVarChar).Value = asset.BarcodeImage; //FIX
             request.Command.Parameters.Add("@CalibrationCompany", SqlDbType.NVarChar).Value = asset.CalibrationCompany;
-            request.Command.Parameters.Add("@CalibrationHistory", SqlDbType.NVarChar).Value = "none";
+            string calXml = new CalibrationLibrary().SerializeToXmlString(new CalibrationLibrary());
+            try
+            {
+                calXml = asset.CalibrationHistory.SerializeToXmlString(asset.CalibrationHistory);
+            }
+            catch { }
+            request.Command.Parameters.Add("@CalibrationHistory", SqlDbType.NVarChar).Value = calXml;
             request.Command.Parameters.Add("@CalibrationPeriod", SqlDbType.NVarChar).Value = asset.CalibrationPeriod;
             request.Command.Parameters.Add("@DateReturned", SqlDbType.NVarChar).Value = asset.DateRecieved.ToString();
             request.Command.Parameters.Add("@DateShipped", SqlDbType.NVarChar).Value = asset.DateShipped.ToString();
@@ -195,7 +201,13 @@ public static class SQLfunc
                     a.CalibrationCompany = dr?.Field<string>("CalibrationCompany");
                     a.LastCalibrated = DateTime.Parse(dr?.Field<string>("LastCalibrated"));
                     a.CalibrationPeriod = dr?.Field<string>("CalibrationPeriod");
-                    a.CalibrationHistory = dr?.Field<string>("CalibrationHistory");
+                    var calXml = dr?.Field<string>("CalibrationHistory");
+                    try
+                    {
+                        a.CalibrationHistory = new CalibrationLibrary().DeserializeFromXmlString<CalibrationLibrary>(calXml);
+                    }
+                    catch { }
+                 
                     a.Images = dr?.Field<string>("Images");
                     a.BarcodeImage = dr?.Field<string>("BarcodeImage");
                     try
@@ -284,7 +296,12 @@ public static class SQLfunc
                     a.CalibrationCompany = dr?.Field<string>("CalibrationCompany");
                     a.LastCalibrated = DateTime.Parse(dr?.Field<string>("LastCalibrated"));
                     a.CalibrationPeriod = dr?.Field<string>("CalibrationPeriod");
-                    a.CalibrationHistory = dr?.Field<string>("CalibrationHistory");
+                    var calXml = dr?.Field<string>("CalibrationHistory");
+                    try
+                    {
+                        a.CalibrationHistory = new CalibrationLibrary().DeserializeFromXmlString<CalibrationLibrary>(calXml);
+                    }
+                    catch { }
                     a.Images = dr?.Field<string>("Images");
                     a.BarcodeImage = dr?.Field<string>("BarcodeImage");
                     try
@@ -395,7 +412,13 @@ public static class SQLfunc
             request.Command.Parameters.Add("@ReturnReport", SqlDbType.NVarChar).Value = asset.ReturnReport;
             request.Command.Parameters.Add("@UPSlabel", SqlDbType.NVarChar).Value = asset.UpsLabel;
 
-            request.Command.Parameters.Add("@CalibrationHistory", SqlDbType.NVarChar).Value = "none";
+            string calXml = new CalibrationLibrary().SerializeToXmlString(new CalibrationLibrary());
+            try
+            {
+                calXml = asset.CalibrationHistory.SerializeToXmlString(asset.CalibrationHistory);
+            }
+            catch { }
+            request.Command.Parameters.Add("@CalibrationHistory", SqlDbType.NVarChar).Value = calXml;
             try
             {
                 foreach (var ii in asset.History.History)

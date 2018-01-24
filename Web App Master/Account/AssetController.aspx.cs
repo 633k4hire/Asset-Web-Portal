@@ -374,7 +374,7 @@ namespace Web_App_Master.Account
         }
 
         [WebMethod]
-        public static Asset AddCheckoutItem(string num)
+        public static Asset AddCheckoutItem(string num, object autocheck=null)
         {
             //MAYBE USE COOKIES HERE instead of session data
            num = ParseBarCode(num);
@@ -393,11 +393,45 @@ namespace Web_App_Master.Account
             }
             checkout.Add(asset);
             HttpContext.Current.Session["CheckOut"] = checkout;
+            if (autocheck as string=="true")
+            {
+                try
+                {
+                    var ud = HttpContext.Current.Session["PersistingUserData"] as Data.UserData;
+                    if (ud.IsAutoChecked == false)
+                    {
+                        ud.IsAutoChecked = true;
+                        ud.Log.Add(new Data.LogEntry("AutoCheck Changed:" + autocheck as string));
+                        SettingsDBData db = new SettingsDBData();
+                        db.Appname = ud.Guid;
+                        db.XmlData = ud.SerializeToXmlString(ud);
+                        Save.Setting(db);
+                    }
+                }
+                catch { }
+            }else
+            {
+                try
+                {
+                    var ud = HttpContext.Current.Session["PersistingUserData"] as Data.UserData;
+                    if (ud.IsAutoChecked == true)
+                    { 
+                        ud.IsAutoChecked = false;
+                        ud.Log.Add(new Data.LogEntry("AutoCheck Changed:" + autocheck as string));
+                        SettingsDBData db = new SettingsDBData();
+                        db.Appname = ud.Guid;
+                        db.XmlData = ud.SerializeToXmlString(ud);
+                        Save.Setting(db);
+                    }
+                }
+                catch { }
+            }
+
             return asset;
         }
 
         [WebMethod]
-        public static Asset AddCheckinItem(string num)
+        public static Asset AddCheckinItem(string num, object autocheck = null)
         {
 
            num = ParseBarCode(num);
@@ -414,9 +448,84 @@ namespace Web_App_Master.Account
             }
             checkin.Add(asset);
             HttpContext.Current.Session["CheckIn"] = checkin;
+            if (autocheck as string == "true")
+            {
+                try
+                {
+                    var ud = HttpContext.Current.Session["PersistingUserData"] as Data.UserData;
+                    if (ud.IsAutoChecked == false)
+                    {
+                        ud.IsAutoChecked = true;
+                        ud.Log.Add(new Data.LogEntry("AutoCheck Changed:" + autocheck as string));
+                        SettingsDBData db = new SettingsDBData();
+                        db.Appname = ud.Guid;
+                        db.XmlData = ud.SerializeToXmlString(ud);
+                        Save.Setting(db);
+                    }
+                }
+                catch { }
+            }
+            else
+            {
+                try
+                {
+                    var ud = HttpContext.Current.Session["PersistingUserData"] as Data.UserData;
+                    if (ud.IsAutoChecked == true)
+                    {
+                        ud.IsAutoChecked = false;
+                        ud.Log.Add(new Data.LogEntry("AutoCheck Changed:" + autocheck as string));
+                        SettingsDBData db = new SettingsDBData();
+                        db.Appname = ud.Guid;
+                        db.XmlData = ud.SerializeToXmlString(ud);
+                        Save.Setting(db);
+                    }
+                }
+                catch { }
+            }
             return asset;
         }
 
+        [WebMethod]
+        public static bool SetAutoCheck(string autocheck)
+        {
+            if (autocheck as string == "true")
+            {
+                try
+                {
+                    var ud = HttpContext.Current.Session["PersistingUserData"] as Data.UserData;
+                    if (ud.IsAutoChecked == false)
+                    {
+                        ud.IsAutoChecked = true;
+                        ud.Log.Add(new Data.LogEntry("AutoCheck Changed:" + autocheck as string));
+                        SettingsDBData db = new SettingsDBData();
+                        db.Appname = ud.Guid;
+                        db.XmlData = ud.SerializeToXmlString(ud);
+                        Save.Setting(db);
+                        return true;
+                    }
+                }
+                catch { return false; }
+            }
+            else
+            {
+                try
+                {
+                    var ud = HttpContext.Current.Session["PersistingUserData"] as Data.UserData;
+                    if (ud.IsAutoChecked == true)
+                    {
+                        ud.IsAutoChecked = false;
+                        ud.Log.Add(new Data.LogEntry("AutoCheck Changed:" + autocheck as string));
+                        SettingsDBData db = new SettingsDBData();
+                        db.Appname = ud.Guid;
+                        db.XmlData = ud.SerializeToXmlString(ud);
+                        Save.Setting(db);
+                        return true;
+                    }
+                }
+                catch { return false; }
+            }
+            return false;
+        }
         [WebMethod]
         public static Asset GetAsset(string num)
         {
@@ -429,6 +538,7 @@ namespace Web_App_Master.Account
                 var asset = al.FirstOrDefault();
                 asset.Images = asset.Images.Replace(",,,", "<@#$>").Replace(",", "").Replace("<@#$>", ",").Replace("Images", "").Replace("\\", "");
                 HttpContext.Current.Session["CurrentAsset"] = asset;
+                HttpContext.Current.Session["Asset"] = asset;
                 return asset;
             }
             //barcode was scanned or manually inputted
@@ -439,6 +549,7 @@ namespace Web_App_Master.Account
             {
                 (req.Tag as Asset).Images = (req.Tag as Asset).Images.Replace("Images", "").Replace("\\", "");
                 HttpContext.Current.Session["CurrentAsset"] = req.Tag as Asset;
+                HttpContext.Current.Session["Asset"] = req.Tag as Asset;
                 return req.Tag as Asset;
             }
             else

@@ -138,7 +138,7 @@ namespace Web_App_Master.Account
                 {
                     string code = manager.GenerateEmailConfirmationToken(user.Id);
                     string callbackUrl = IdentityHelper.GetUserConfirmationRedirectUrl(code, user.Id, Request);
-                    EmailHelper.SendEmailNoticeAsync(user.Email,"Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.", "Confirm your account");
+                    EmailHelper.SendEmailAsync(user.Email,"Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.", "Confirm your account");
                    
                     FailureText.Text = "Confirmation email sent. Please view the email and confirm your account.";
                     ErrorMessage.Visible = true;

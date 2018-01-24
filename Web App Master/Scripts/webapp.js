@@ -314,11 +314,40 @@ function AssetSuccess(msg) {
         NAME.className = "glyphicon glyphicon-barcode";   // Set other class name
     }
     document.ASSET = msg.d;
-    LoadAsset(msg.d);
+    var tmp = $("#BarcodeCheckBox").prop('checked');
+    if (tmp === true)
+    {
+        if (msg.d.IsOut)
+        {
+            AjaxAddCheckin(msg.d.AssetNumber, true);
+        } else {           
+            AjaxAddCheckout(msg.d.AssetNumber, true);
+        }
+       
+    } else {
+        SetAutoCheck('false');
+         LoadAsset(msg.d);
+    }
+   
     //Go To Asset Tab
     
     return false;
 };
+function HideCalUploader()
+{
+    $("#UploadAssetCert").hide();
+}
+function SetAutoCheck(autocheck)
+{
+    $.ajax({
+        type: 'POST',
+        url: '/Account/AssetController.aspx/SetAutoCheck',
+        data: "{'autocheck':'" + autocheck+"'}",
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json'  
+    });
+
+}
 function Shake(id)
 {
     var iconspan = $("#" + id);    
@@ -339,6 +368,7 @@ function LoadAsset(asset) {
        
         try {
             BindAssetHistory();
+            BindAssetCalibration();
             HideAllFrames();
             //$("#IsAvUp").html("true");
         } catch (erx1) { }
@@ -470,7 +500,7 @@ function SetAssetViewHeight() {
     newHeight = myViewHeight - 178;
     var a = $("#AssetImageDiv").height();
     $("#AssetImageDiv").height(newHeight);
-    $("#AssetCalibrationDiv").height(newHeight);
+    $("#AssetCalibrationDiv").height(newHeight-25);
     $("#AssetPackingReportDiv").height(newHeight);
     $("#AssetShippingReportDiv").height(newHeight);
     $("#AssetReceivingReportDiv").height(newHeight);
@@ -497,6 +527,10 @@ function BindAssetHistory() {
     var btn = document.getElementById("HistoryBinderBtn");
     btn.click();
 }
+function BindAssetCalibration() {
+    var btn = document.getElementById("CalibrationBinderBtn");
+    btn.click();
+}
 function JumpToTab(dest)
 {
     //$("#AssetTab").css("opacity", 0);
@@ -506,12 +540,15 @@ function JumpToTab(dest)
     //$("#HistoryTab").css("opacity", 0);
    // $("#" + dest).css("opacity", 1);
 }
-function AjaxAddCheckout(num) {
-    
+function AjaxAddCheckout(num, autocheck) {
+    if (autocheck == null)
+    {
+        autocheck = false;
+    }
     $.ajax({
         type: 'POST',
         url: '/Account/AssetController.aspx/AddCheckoutItem',
-        data: "{'num':'" + num + "'}",
+        data: "{'num':'" + num + "','autocheck':'" + autocheck+"'}",
         contentType: 'application/json; charset=utf-8',
         dataType: 'json',
         success: AddCheckOutItem,
@@ -521,11 +558,14 @@ function AjaxAddCheckout(num) {
     event.stopPropagation();
    
 };
-function AjaxAddCheckin(num) {
+function AjaxAddCheckin(num, autocheck) {
+    if (autocheck == null) {
+        autocheck = false;
+    }
     $.ajax({
         type: 'POST',
         url: '/Account/AssetController.aspx/AddCheckinItem',
-        data: "{'num':'" + num + "'}",
+        data: "{'num':'" + num + "','autocheck':'" + autocheck + "'}",
         contentType: 'application/json; charset=utf-8',
         dataType: 'json',
         success: AddCheckInItem,

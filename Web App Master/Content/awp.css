@@ -135,7 +135,7 @@
 .awp-add-btn {
     display: block;
     text-align: left;
-    vertical-align: top;
+    
     padding-left: 10px;
     padding-bottom: 18px;
     margin: 3px;
@@ -146,8 +146,7 @@
     z-index: 15000;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
 }
-.awp-inner-btn {
-}
+
 .awp_box_title {
     height: auto !important;
     border-top-left-radius: 5px;
@@ -158,7 +157,16 @@
     color:white;
 }
 iframe {   
+    position: relative;
+}
+#fake {
     position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: -1;
+    border: none;
 }
 .awp_box_content {
     height: auto !important;

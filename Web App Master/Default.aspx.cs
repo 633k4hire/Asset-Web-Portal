@@ -12,6 +12,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using Web_App_Master.Account;
 using Web_App_Master.Models;
+using static Notification.NotificationSystem;
 
 namespace Web_App_Master
 {
@@ -39,6 +40,35 @@ namespace Web_App_Master
                 AssetController.UpdateAsset(a);
                 a = AssetController.GetAsset("0007");
             }
+        }
+
+        protected void tester_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                EmailNotice notice = new EmailNotice();
+
+                notice.Scheduled = DateTime.Now.AddDays(30);
+                notice.NoticeType = NoticeType.Checkout;
+                notice.NoticeAction = Global.CheckoutAction;
+                var assets = new List<Asset>() { Global.Library.Assets[0], Global.Library.Assets[1], Global.Library.Assets[2], Global.Library.Assets[3], Global.Library.Assets[4] };
+                foreach (var ass in assets)
+                {
+                    notice.Assets.Add(ass.AssetNumber);
+                }
+                notice.NoticeControlNumber = assets[0].OrderNumber;               
+                notice.Body = Global.Library.Settings.CheckOutMessage;
+                notice.Subject = "Asset Return Reminder";
+                var engineer = (from d in Global.Library.Settings.ServiceEngineers where d.Name == assets[0].ServiceEngineer select d).FirstOrDefault();
+                var statics = (from d in Global.Library.Settings.StaticEmails select d).ToList();
+
+                notice.Emails.Add(engineer);
+                notice.Emails.AddRange(statics);
+                notice.EmailAddress = engineer;
+                Global.NoticeSystem.Add(notice);
+                var a = Global.NoticeSystem.SerializeToXmlString(Global.NoticeSystem);
+            }
+            catch { }
         }
     }
 }

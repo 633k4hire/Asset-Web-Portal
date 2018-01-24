@@ -695,7 +695,7 @@ namespace Helpers
         public string CheckInMessage = "";
 
         [XmlElement("NotificationMessage")]
-        public string NotificationMessage = "";
+        public string NotificationMessage = "";       
 
         [XmlElement("ShipperNotification")]
         public string ShipperNotification = "";
@@ -708,7 +708,22 @@ namespace Helpers
 
         [XmlElement]
         public int AssetNumberLength = 4;
-       
+        [XmlElement]
+        public string SenderEmail = "provider.service.secure@gmail.com";
+        [XmlElement]
+        public string SenderPassword = "@Service1";
+        [XmlElement]
+        public string SenderHost = "smtp.gmail.com";
+        [XmlElement]
+        public int SenderPort = 587;
+        [XmlElement]
+        public string CalibrationMessage = @"Hello <name>,<NL><NL>
+                Calibrated Tool, <serviceTool>, is out of calibration <NL> 
+                Please send tool for calibration.<NL><NL>
+                Kind Regards,<NL><NL>
+                Support Team
+                ";
+
     }
 
     [Serializable]//xml
@@ -748,6 +763,7 @@ namespace Helpers
             OrderNumber = "0";
             AssetName = PackingSlip =UpsLabel = ReturnReport  = ShipTo = ServiceEngineer= PersonShipping=  Barcode = Description= BarcodeImage= CalibrationCompany= CalibrationPeriod=   "";
             IsOut = IsDamaged = OnHold = false;
+            CalibrationHistory = new CalibrationLibrary();
             return this;
         }
         [XmlElement]
@@ -807,7 +823,7 @@ namespace Helpers
         [XmlElement("CalibrationPeriod")]
         public string CalibrationPeriod { get; set; }
         [XmlElement("CalibrationHistory")]
-        public object CalibrationHistory { get; set; }
+        public CalibrationLibrary CalibrationHistory { get; set; }
         [XmlElement("OnHold")]
         public bool OnHold { get; set; }
         [XmlElement("weight")]
@@ -861,9 +877,10 @@ namespace Helpers
         }
     }
     [Serializable]
+    
     public class EmailNotice :  Notification.NotificationSystem.Notice
     {
-        public static EmailNotice Create(List<Asset> assets, List<EmailAddress> emails,string body, string subject)
+        public static EmailNotice Create(List<string> assets, List<EmailAddress> emails,string body, string subject)
         {
             EmailNotice n = new EmailNotice();
             n.Emails = new List<EmailAddress>();
@@ -875,13 +892,14 @@ namespace Helpers
         }
         public EmailNotice()
         {
-            Body = Subject = "";
+            Body = ""; Subject = "";
             Emails = new List<EmailAddress>();
+            Assets = new List<string>();
         }
         [XmlElement("Emails")]
         public List<EmailAddress> Emails { get; set; }
         [XmlElement]
-        public List<Asset> Assets = new List<Asset>();
+        public List<string> Assets = new List<string>();
         [XmlElement]
         public string Body { get; set; }
         [XmlElement]

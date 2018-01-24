@@ -36,7 +36,10 @@
                     <div class="awp_box_content bg-metro-light">
                          <div id="ReceivingHidden" style="display:none"><asp:Literal ID="ReceivingLink" runat="server"></asp:Literal> </div>
                         <div id="IframeDiv" style="min-height:100px;height:300px;">
-                         <iframe frameborder="0" style="position:absolute; min-height:100px;" id="ReportFrame" runat="server" src="#" ></iframe>
+                       <!-- <iframe frameborder="0" style="position:absolute; min-height:100px;" id="ReportFrame" runat="server" src="#" ></iframe>--> 
+                            <object  id="PdfEmbeddedViewer" data="/Account/Labels/1Z9A14T70291180501.pdf" type="application/pdf" width="100%" height="100%">
+                             <p>This browser does not support PDFs. Please download the PDF to view it: <a href="/pdf/sample-3pp.pdf">Download PDF</a>.</p>
+                            </object>
                          </div>
                     </div>
                 </div>

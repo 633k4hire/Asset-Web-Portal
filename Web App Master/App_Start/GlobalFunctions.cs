@@ -16,6 +16,15 @@ namespace Web_App_Master
     //MAKE ALL OF THESE ASYNC
     public class Save
     {
+        public static bool Asset(Asset asset)
+        {
+            try
+            {
+               return AssetController.UpdateAsset(asset);
+                
+            }
+            catch { return false; }
+        }
         public static Task<bool> SettingAsync(SettingsDBData data)
         {
             return Task.Run(() =>
@@ -205,13 +214,24 @@ namespace Web_App_Master
                 db.XmlData = Global.NoticeSystem.SerializeToXmlString(Global.NoticeSystem);
                 return AssetController.PushSetting(db);
             }
-            catch { return false; }
+            catch {
+                //Global.NoticeSystem.Notices = new Notification.NotificationSystem.NoticeBindinglist();
+                return false; }
+            
         }
         
 
     }
     public class Load
     {
+        public static Asset Asset(string num)
+        {
+            try
+            {
+                return AssetController.GetAsset(num);
+            }
+            catch { return null; }
+        }
         public static SettingsDBData Setting(string guid)
         {
             try

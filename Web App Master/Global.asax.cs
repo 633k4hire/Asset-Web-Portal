@@ -121,5 +121,10 @@ namespace Web_App_Master
 
             return n;
         }
+        public static Notice CalibrationAction(Notice n)
+        {
+
+            return n;
+        }
     }
 }

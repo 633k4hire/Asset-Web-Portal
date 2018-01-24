@@ -66,34 +66,17 @@ namespace Web_App_Master.Account.Admin
             }
             try
             {
-                if (Global.Library.Settings.Notifications_30_Day != null)
+                if (Global.NoticeSystem.Notices != null)
                 {
-                    var list = (from n in Global.Library.Settings.Notifications_30_Day orderby n.Time select n).ToList();
-                    AssetNoticeBindinglist list30day = new AssetNoticeBindinglist(list);
-
-                    Notice30DayRepeater.DataSource = list30day;
+                   
+                    Notice30DayRepeater.DataSource = Global.NoticeSystem.Notices;
                     Notice30DayRepeater.DataBind();
                 }
             }
             catch
             {
-                PopNotify("Error", "Could Not Bind 30 Day Notices");
-            }
-            try
-            {
-                if (Global.Library.Settings.Notifications_15_Day != null)
-                {
-                    var list = (from n in Global.Library.Settings.Notifications_15_Day orderby n.Time select n).ToList();
-                    AssetNoticeBindinglist list15day = new AssetNoticeBindinglist(list);
-
-                    Notice15DayRepeater.DataSource = list15day;
-                    Notice15DayRepeater.DataBind();
-                }
-            }
-            catch
-            {
-               PopNotify("Error", "Could Not Bind 15 Day Notices");
-            }
+                PopNotify("Error", "Could Not Bind Notices");
+            }           
             try
             {
                 if (Global.Library.Settings.ShippingPersons != null)
@@ -836,12 +819,27 @@ namespace Web_App_Master.Account.Admin
 
         protected void DeleteNotice30DayBtn_Command(object sender, CommandEventArgs e)
         {
-            int i = 0;
+            var rem = (from n in Global.NoticeSystem.Notices where n.Guid == e.CommandArgument as string select n).FirstOrDefault();
+            if (rem!=null)
+            {
+                Global.NoticeSystem.Notices.Remove(rem);
+            }
             UpdateAssetAdmin();
         }
 
         protected void SendNotice30DayBtn_Command(object sender, CommandEventArgs e)
         {
+            var rem = (from n in Global.NoticeSystem.Notices where n.Guid == e.CommandArgument as string select n).FirstOrDefault();
+            //send then remove notice
+            if (rem != null)
+            {
+                EmailHelper.SendNotificationSystemNotice(rem);
+                if (!Global.Library.Settings.TESTMODE)
+                {
+                     Global.NoticeSystem.Notices.Remove(rem);
+                }
+               
+            }
             UpdateAssetAdmin();
         }
 

@@ -53,10 +53,10 @@
                                 <li>
                                     <div class="input-control" data-role="input" style="vertical-align:top">
                                         <input id="BarcodeSearchBox" type="number" style="width:130px;"  />
-                            <button class="button" id="BarcodeButton" type="button" onclick=" BarcodeScanned($('#BarcodeSearchBox').val());"><i id="barcodeIcon" style="font-size:1.5em;" class="glyphicon glyphicon-barcode "></i></button>
+                            <button class="button" id="BarcodeButton" type="button" onclick=" BarcodeScanned($('#BarcodeSearchBox').val());"><i id="barcodeIcon" style="font-size:1.7em;" class="glyphicon glyphicon-barcode "></i></button>
                                        
                         </div>
-                                     <input id="BarcodeCheckBox" type="checkbox" style="vertical-align:middle" /><i class="glyphicon glyphicon-check" style="padding-left:5px"></i>
+                                     <asp:CheckBox ClientIDMode="Static" id="BarcodeCheckBox"  runat="server"  style="vertical-align:middle" /><i class="glyphicon glyphicon-check" style="padding-left:5px"></i>
                         </li>     
                             </LoggedInTemplate>
                         </asp:LoginView>
@@ -132,7 +132,7 @@
                             </LoggedInTemplate>
                         </asp:LoginView>
                        
-                        <div class="app-bar-drop-container place-right" data-role="dropdown" data-no-close="true" style="text-shadow:none!important;display: none; z-index:90000;">
+                        <div class="app-bar-drop-container place-right" data-role="dropdown" data-no-close="true" style="text-shadow:none!important;display: none; z-index:99999;">
                             <div class="padding20 fg-dark">
                                 
                                     <asp:LoginView runat="server" ID="topbarloginview" ViewStateMode="Disabled">
@@ -174,7 +174,7 @@
 	        <div class="main-content " style="height: 618px;">
 		        <!-- main-content-inner -->
 		        <div class="main-content-inner">
-			
+			<iframe id="fake" src="about:blank"></iframe>
 			        <asp:ContentPlaceHolder ID="MainContent" runat="server" Visible="true">
                     </asp:ContentPlaceHolder>
 		        </div><!-- /main-content-inner -->		
@@ -188,11 +188,11 @@
                             	
          <div class="side-scroll" style="height: 50%;">
              <h3>IN</h3>
-             <ul class="t-menu bg-metro-dark stuck">
+             <ul class="t-menu bg-metro-dark stuck fg-white">
                             <li><a href="/Account/CheckIn.aspx"><span class="glyphicon glyphicon-cloud-upload md-glyph"></span></a></li>
                             <li><a href="#" class="dropdown-toggle"><span class="glyphicon glyphicon-cog md-glyph"></span></a>
                                 <ul class="t-menu horizontal compact" data-role="dropdown">
-                                    <li><a href="#"><span class="glyphicon glyphicon-remove md-glyph">Clear</span></a></li>
+                                    <li><asp:LinkButton runat="server" ID="clearCheckIn" OnClick="clearCheckIn_Click"><span class="glyphicon glyphicon-remove md-glyph">Clear</span></asp:LinkButton></li>
                                 </ul>
                             </li>
                             
@@ -226,6 +226,7 @@
             <Triggers>
                 <asp:AsyncPostBackTrigger ControlID="UpdateAllCarts" EventName="Click" />
                <asp:AsyncPostBackTrigger ControlID="button33" EventName="Click" />
+                <asp:AsyncPostBackTrigger ControlID="clearCheckIn" EventName="Click" />
             </Triggers>
          </asp:UpdatePanel>
 			</div><!-- /side-scroll-inner -->
@@ -236,11 +237,11 @@
 		<!-- side-scroll -->
 		<div class="side-scroll2" style="height:50%;">
             <h3>OUT</h3>
-             <ul class="t-menu bg-metro-dark stuck">
+             <ul class="t-menu bg-metro-dark stuck fg-white">
                             <li><a href="/Account/OutCart.aspx"><span class="glyphicon glyphicon-cloud-download md-glyph"></span></a></li>
                             <li><a href="#" class="dropdown-toggle"><span class="glyphicon glyphicon-cog md-glyph"></span></a>
                                 <ul class="t-menu horizontal compact" data-role="dropdown">
-                                    <li><a href="#"><span class="glyphicon glyphicon-remove md-glyph">Clear</span></a></li>
+                                    <li><asp:LinkButton runat="server" ID="clearCheckout" OnClick="clearCheckout_Click"><span class="glyphicon glyphicon-remove md-glyph">Clear</span></asp:LinkButton></li>
                                 </ul>
                             </li>
                             
@@ -276,6 +277,7 @@
             <Triggers>
                 <asp:AsyncPostBackTrigger ControlID="UpdateAllCarts" EventName="Click" />
                <asp:AsyncPostBackTrigger ControlID="button33" EventName="Click" />
+                <asp:AsyncPostBackTrigger ControlID="clearCheckout" EventName="Click" />
             </Triggers>
          </asp:UpdatePanel>
                
@@ -289,8 +291,8 @@
 <!--End Side Task Bar -->
 <!--Asset Charm-->
     <div data-role="charm" data-position="right" id="assetview-charm" class="charm right-side bg-metro-dark" style="opacity: 1; display: block; right: 0px; left: auto; top: 50px; bottom: 0px; min-width:100%; width:100%; z-index:89999" >
-<!--ASSET MENU-->
-        <div id ="AssetHeader" class="app-bar bg-metro-dark " style="margin-top:0px !important;">    
+<!--ASSET MENU--><span class="charm-closer" onclick="hideMetroCharm('#assetview-charm');"></span>
+        <div id ="AssetHeader" class="app-bar bg-metro-dark shadow-bottom " style="margin-top:0px !important;">    
             <ul class="app-bar-menu">
                 <li><span class="awp-add-btn bg-green shadow" id="InOutBtn"><span id="awp-inner-btn"><i title="Add To Task List" class="glyphicon glyphicon-plus"></i></span></span></li>
                 <li>&nbsp</li>
@@ -480,19 +482,65 @@
                <input onclick="HideAllFrames();" type="radio" id="tab-3" name="tab-group-1">
                <label for="tab-3">Calibration</label>     
                <div id="CalibrationTab" class="content bg-metro ShowScroll">
-                    <div class="col-md-12" style="margin-top:-21px!important; margin-bottom:0px !important;">
+       
+                  
+                    <div class="col-md-9" style="margin-top:-21px!important; margin-bottom:0px !important;">
                         
                         <div class="awp_box rounded bg-metro-dark shadow">
+                            <div class="awp-bar">
+                                <span class="awp-bar-btn bg-blue fg-white shadow" onclick="ShowDiv('UploadAssetCert')"><i title="Upload New Certificate"  style="font-size:1em;" class="mif-file-upload av-hand-cursor"></i></span>
+                            </div>
                             <div class="awp_box_title bg-metro-dark">
-                               <span class="fg-white shadow-metro-black">Calibration</span>
+                               <span class="fg-white shadow-metro-black">Calibration Certificates</span>
                             </div>
                             <div class="awp_box_content bg-metro-light" style="text-align:left !important;">
-                                <div id="AssetCalibrationDiv" style="min-height:300px; text-align:center;">                                   
-
+                                <div id="AssetCalibrationDiv" style=" text-align:center;">                                   
+                                    <asp:UpdatePanel ID="CalibrationUpdatePanel" runat="server">
+                                        <ContentTemplate>
+                                            <asp:Repeater ID="CalibrationRepeater" runat="server">
+                                                <HeaderTemplate>
+                                                     <ul class="list-group">
+                                                </HeaderTemplate>
+                                                <ItemTemplate>                                                   
+                                                    <li class="list-group-item">
+                                                        <a href='<%# Eval("ImagePath") %>'>
+                                                            <span> <%# Eval("CalibrationCompany") %></span>-
+                                                            <span> <%# Eval("LastCalibration").ToString() %></span>-
+                                                            <span> <%# Eval("SchedulePeriod").ToString() %></span>
+                                                        </a>
+                                                    </li>
+                                                </ItemTemplate>
+                                                <FooterTemplate>
+                                                    </ul>
+                                                </FooterTemplate>
+                                            </asp:Repeater>
+                                        </ContentTemplate>
+                                        <Triggers>
+                                            <asp:AsyncPostBackTrigger ControlID="UploadAssetCertificateBtn" EventName="Click" />
+                                            <asp:AsyncPostBackTrigger ControlID="CalibrationBinderBtn" EventName="Click" />
+                                        </Triggers>
+                                    </asp:UpdatePanel>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-3" style="margin-top:-21px!important; margin-bottom:0px !important;">
+                        
+                        <div class="awp_box rounded bg-metro-dark shadow">
+                            <span class="awp-save-btn bg-red fg-white shadow""><asp:LinkButton runat="server" ID="SaveCalOptionsBtn"  OnClick="SaveCalOptionsBtn_Click" ><i  title="Save"  style="font-size:1em;" class=" fg-white glyphicon glyphicon-floppy-disk av-hand-cursor"></i></asp:LinkButton></span>
+                            <div class="awp_box_title bg-metro-dark">
+                               <span class="fg-white shadow-metro-black">Calibration Options</span>
+                            </div>
+                            <div class="awp_box_content bg-metro-light fg-white" style="text-align:left !important;">
+                                <div id="AssetCalibrationOptionsDiv" style=" text-align:left;">   
+                                                <div style="font-weight:bold;" ><strong>Calibration Company</strong></div>
+                                                <div><input style="font-weight:bold;" runat="server"  id="CalCompany" type="text" class="form-control" placeholder="Calibration Company" /></div>                        
+                                                <div style="font-weight:bold;" ><strong>Calibration Period</strong></div>
+                                                <div><input style="font-weight:bold;" runat="server"  id="CalPeriod" type="text" class="form-control" placeholder="Calibration Period" /></div>                        
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
 
                </div> 
            </div>
@@ -505,7 +553,7 @@
                                      <asp:UpdatePanel runat="server" ID="AssetHistoryUpdatePanel" UpdateMode="Conditional" ChildrenAsTriggers="true">
                                         <ContentTemplate>                
                                            <!--REPEATER-->
-                                            <div style=" padding-top:50px !important">
+                                            <div  style="margin-top:-21px!important; margin-bottom:0px !important;">
                                                 <asp:Repeater ID="AssetHistoryRepeater" runat="server" EnableViewState="false" OnItemDataBound="AssetHistoryRepeater_ItemDataBound">
                                                     <HeaderTemplate> </HeaderTemplate>
                                                     <ItemTemplate></ItemTemplate>
@@ -525,13 +573,15 @@
 <!--END TABS-->
               </div>
 <!--EndAsset Charm-->
-<!--Super Button & SuperFields-->
+<!--Super Button & SuperFields-->         
             <div id="IsAvUp" style="display:none"> </div>
 
             <asp:Button ID="HistoryBinderBtn" runat="server" Text="CLICK ME" OnClick="HistoryBinderBtn_Click" style="display:none" ClientIDMode="Static"/>
+           <asp:Button ID="CalibrationBinderBtn" runat="server" Text="CLICK ME" OnClick="CalibrationBinderBtn_Click" style="display:none" ClientIDMode="Static"/>
 
             <asp:Button ID="button33" runat="server" Text="CLICK ME" OnClick="button33_Click" style="display:none" ClientIDMode="Static"/>
             <asp:Button ID="UpdateAllCarts" runat="server" Text="UpdateAllCarts" OnClick= "UpdateAllCarts_Click" style="display:none" ClientIDMode="Static"/>   
+<!--End Super Buttons-->  
 <!--Dialogs-->
             <div id="UploadAssetImage" class="awp-outer-dialog" style="display:none; z-index:99999" >
         <div class=" awp-inner-dialog" style="opacity:initial !important">
@@ -550,6 +600,21 @@
       
         </div>
     </div>
+            <div id="UploadAssetCert" class="awp-outer-dialog" style="display:none; z-index:99999" >
+                 <div class=" awp-inner-dialog" style="opacity:initial !important">
+                    <span class="awp-dialog-close-btn bg-red fg-white shadow " onclick="HideDiv('UploadAssetCert')"><i title="Close"  style="vertical-align:top" class="mif-cross av-hand-cursor fg-white shadow-metro-black"></i></span>
+                    <div class="awp_box rounded bg-metro-dark shadow" style="left:50% !important; top:30%">
+                        <div class="awp_box_title bg-metro-dark">
+                           <span class="fg-white shadow-metro-black"><span class="mif-file-upload"></span>New Asset Certificate</span>
+                        </div>
+                        <div class="awp_box_content bg-metro-light">  
+                            <asp:FileUpload ID="CertUpload" runat="server" />
+                            <asp:Button runat="server" CssClass="btn btn-primary" ID="UploadAssetCertificateBtn" ClientIDMode="Static" OnClick="UploadAssetCertificateBtn_Click" Text="Upload" />
+                       </div>
+                    </div>      
+                 </div>
+             </div>
+
 <!--End Dialogs-->
 <!--Loader-->
             <div id="FullScreenLoader" class="awp-outer-loader" style="display:none" >
@@ -559,7 +624,7 @@
             </div>
 <!--End Loader-->
 
-<!--End Super Buttons-->            
+          
        </form>
 
 </body>

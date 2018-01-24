@@ -12,7 +12,7 @@ namespace Web_App_Master
 {
     public static class EmailHelper
     {
-        public static void SendEmailNoticeAsync(string email,string body = "", string subject = "")
+        public static void SendEmailAsync(string email,string body = "", string subject = "")
         {
 
 
@@ -46,7 +46,7 @@ namespace Web_App_Master
                 }
             }).Start();
         }
-        public static void SendMassEmailNoticeAsync(string[] emails, string body = "", string subject = "")
+        public static void SendMassEmailAsync(string[] emails, string body = "", string subject = "")
         {
 
 
@@ -83,7 +83,7 @@ namespace Web_App_Master
                 }
             }).Start();
         }
-        public static void SendNoticeAsync(List<Asset> assets, string Body = "")
+        public static void SendCheckOutNoticeAsync(List<Asset> assets, string Body = "")
         {
             var engineer = (from d in Global.Library.Settings.ServiceEngineers where d.Name == assets[0].ServiceEngineer select d).FirstOrDefault();
             var statics = (from d in Global.Library.Settings.StaticEmails  select d.Email).ToList();
@@ -98,10 +98,10 @@ namespace Web_App_Master
             {
 
                 Body = Body.Replace("<name>", assets[0].ServiceEngineer);
-                var serviceToolString = " < br />";
+                var serviceToolString = "";
                 foreach(var item in assets)
                 {
-                    serviceToolString += item.AssetName + "< br />";
+                    serviceToolString +="("+ item.AssetName + ")";
                 }
                 
                 Body = Body.Replace("<serviceTool>", serviceToolString);
@@ -138,6 +138,64 @@ namespace Web_App_Master
                 }
             }).Start();
         }
+        public static void SendNotificationSystemNotice(Notification.NotificationSystem.Notice notice)
+        {
+            if (notice.NoticeType== Notification.NotificationSystem.NoticeType.Checkout)
+            {
+                if (Global.Library.Settings.TESTMODE) return;
+                if (notice is EmailNotice )
+                {
+                    var en = notice as EmailNotice;
+                    string Body = en.Body;
+                    new System.Threading.Thread(() =>
+                    {
 
+                        Body = Body.Replace("<name>", en.EmailAddress.Name);
+                        var serviceToolString = " < br />";
+                        foreach (var item in en.Assets)
+                        {
+                            serviceToolString += "("+ item + ")";
+                        }
+
+                        Body = Body.Replace("<serviceTool>", serviceToolString);
+                        Body = Body.Replace("<serviceOrder>", en.NoticeControlNumber);
+                        Body = Body.Replace("<dateAssigned>", en.Created.ToShortDateString());
+                        Body = Body.Replace("<NL>", "<br />");
+                        MailMessage msg = new MailMessage();
+                        msg.Subject = "Return Request:: Job# " + en.NoticeControlNumber + " :: " + DateTime.Now.ToString();
+                        msg.IsBodyHtml = true;
+                        msg.BodyEncoding = Encoding.ASCII;
+                        msg.Body = Body;
+                        msg.From = new MailAddress(Global.Library.Settings.SenderEmail);
+                        foreach (var email in en.Emails)
+                        {
+                            msg.To.Add(email.Email);
+                        }
+                        string username = Global.Library.Settings.SenderEmail;  //email address or domain user for exchange authentication
+                        string password = Global.Library.Settings.SenderPassword;  //password
+                        SmtpClient mClient = new SmtpClient();
+                        mClient.Host = Global.Library.Settings.SenderHost;
+                        mClient.Port = Global.Library.Settings.SenderPort;
+                        mClient.UseDefaultCredentials = false;
+                        mClient.Credentials = new NetworkCredential(username, password);
+                        mClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                        mClient.Timeout = 100000;
+                        mClient.EnableSsl = true;
+                        try
+                        {
+                            mClient.Send(msg);
+                        }
+                        catch
+                        {
+
+                        }
+                    }).Start();
+                }
+               
+            }                      
+
+        }
     }
 }
+
+

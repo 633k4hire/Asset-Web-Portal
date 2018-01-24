@@ -33,7 +33,7 @@ namespace Web_App_Master.Account
                 //create body and subject
 
                 //send email
-                EmailHelper.SendEmailNoticeAsync(user.Email, "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.", "Confirm your account");
+                EmailHelper.SendEmailAsync(user.Email, "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.", "Confirm your account");
                 //manager.SendEmail(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.");
                 if (user.EmailConfirmed)
                 {

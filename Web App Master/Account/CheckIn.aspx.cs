@@ -20,7 +20,7 @@ namespace Web_App_Master.Account
                 {
                     try
                     {
-                        EmailHelper.SendNoticeAsync(group, Global.Library.Settings.CheckInMessage);
+                        EmailHelper.SendCheckOutNoticeAsync(group, Global.Library.Settings.CheckInMessage);
                     }
                     catch { }
 
@@ -276,7 +276,7 @@ namespace Web_App_Master.Account
                 Session["CurrentCheckinReport"] = path;
                 foreach(var ass in assets)
                 {
-                    ass.ReturnReport = path;
+                    ass.ReturnReport = "/Account/Receiving/" + info + ".pdf";
                 }
                 var path2 = Server.MapPath(path);
                 filenames.Add(path2);
@@ -335,7 +335,7 @@ namespace Web_App_Master.Account
                     keys.Add("Desc" + i.ToString(), asset.AssetName);
                     keys.Add("PartNo" + i.ToString(), asset.AssetNumber);
                     keys.Add("Qty" + i.ToString(), "1");
-                    asset.ReturnReport = path2;
+                    
                     ++i;
                 }
 

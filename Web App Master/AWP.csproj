@@ -855,6 +855,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Account\Avery\" />
+    <Folder Include="Account\Certs\" />
     <Folder Include="Account\CheckOutPdf\" />
     <Folder Include="Account\Labels\" />
     <Folder Include="Account\PackingLists\" />

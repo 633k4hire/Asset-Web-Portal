@@ -45,22 +45,10 @@ namespace Web_App_Master.Account
             {
                 try
                 {
-                    EmailHelper.SendNoticeAsync(assets, Global.Library.Settings.CheckOutMessage);
+                    EmailHelper.SendCheckOutNoticeAsync(assets, Global.Library.Settings.CheckOutMessage);
                 }
                 catch { ShowError("Problem Sending Emails"); }
-                try
-                {
-                    EmailNotice n = new EmailNotice();
-                    n.Scheduled = DateTime.Now.AddDays(30);
-                    n.NoticeType = NoticeType.Chekout;
-                    n.NoticeAction = Global.CheckoutAction;
-                    n.Assets = assets;
-                    n.NoticeControlNumber = assets.FirstOrDefault().OrderNumber;
-                    n.Name = assets[0].OrderNumber;
-                    Global.NoticeSystem.Add(n);
-                    var task = Save.NotificationSystemAsync();
-                }
-                catch { ShowError("Problem Adding Timed Notice"); }
+                
                
              
             }
@@ -100,6 +88,7 @@ namespace Web_App_Master.Account
         protected bool Finalized = false;
         protected void FinalizeBtn_Click(object sender, EventArgs e)
         {
+            
             if (ShippingMethodDropDownList.Text=="")
             { 
                 ShowError("Please Select A Shipping Option");
@@ -122,15 +111,42 @@ namespace Web_App_Master.Account
                     UpdateArrival();
                     CreatePackingSlip();
                     UpdateUpsLabel();                
-                    Shake(ReportLink);                  
+                    Shake(ReportLink);
+                    try
+                    {
+                        EmailNotice notice = new EmailNotice();
+                        
+                        notice.Scheduled = DateTime.Now.AddDays(30);
+                        notice.NoticeType = NoticeType.Checkout;
+                        notice.NoticeAction = Global.CheckoutAction;
+                        foreach (var asset in checkoutdata.CheckOutItems)
+                        {
+                            notice.Assets.Add(asset.AssetNumber);
+                        }                        
+                        notice.NoticeControlNumber = checkoutdata.CheckOutItems[0].OrderNumber;
+                        notice.Body = Global.Library.Settings.CheckOutMessage;
+                        notice.Subject = "Asset Return Reminder";
+                        var engineer = (from d in Global.Library.Settings.ServiceEngineers where d.Name == Session["Engineer"] as string select d).FirstOrDefault();
+                        var statics = (from d in Global.Library.Settings.StaticEmails select d).ToList();
+                        if (engineer==null)
+                        {
+                            engineer = new EmailAddress();
+                        }
+                        notice.Emails.Add(engineer);
+                        notice.Emails.AddRange(statics);                        
+                        notice.EmailAddress = engineer;
+                        Global.NoticeSystem.Add(notice);
+                        Save.NotificationSystem();
+                    }
+                    catch { ShowError("Problem Adding Timed Notice"); }
                     SaveToUserPersistantLog();
                     FinalizeAssets(Session["Checkout"] as List<Asset>);
                     Session["Checkout"] = new List<Asset>();
-                    if (!Global.Library.Settings.TESTMODE)
-                    {                                                
+                   
                         but_OK.Enabled = false;
                         FinalizeHolder.Visible = false;
-                    }
+                    
+                   
                     CheckoutView.ActiveViewIndex = 1; // goto report
                 }
                 else

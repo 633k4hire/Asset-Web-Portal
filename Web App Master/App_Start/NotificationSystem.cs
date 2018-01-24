@@ -11,9 +11,10 @@ namespace Notification
     /// <summary>
     /// Self Contained Scheduled Notificaton System...Just Add Notice
     /// </summary>
+    [XmlInclude(typeof(EmailNotice))]
     [Serializable]
     [XmlRoot]
-    public class NotificationSystem:Serializers.XSerializer<NotificationLibrary>
+    public class NotificationSystem:Serializers.XSerializer<NotificationSystem>
     {
         [XmlElement]
         public string m_guid = new System.Guid().ToString();
@@ -21,12 +22,14 @@ namespace Notification
         public string Guid { get { return m_guid; } set { m_guid = value; } }
      
         public delegate Notice NoticeActionDelegate(Notice n);
-        [XmlElement]
+        [XmlIgnore]
         private int m_capacity = -1;
         /// <summary>
         /// Self Removing Que...If Notices reaches Capacity the LastItem is removed
         /// </summary>
+        [XmlElement]
         public int Capacity { get { return m_capacity; } set { m_capacity = value; } }
+        
         private static Notice DefaultAction(Notice n) { return n; }
         public NotificationSystem()
         {
@@ -53,7 +56,7 @@ namespace Notification
         [Serializable]
         public enum NoticeType
         {
-            None,User,Customer,Administration,Log,Application,Asset,AssetList,Calibration,Notice,Chekout,Checkin,Damaged,OnHold
+            None,User,Customer,Administration,Log,Application,Asset,AssetList,Calibration,Notice,Checkout,Checkin,Damaged,OnHold
         }
         
         [XmlElement]
@@ -172,6 +175,7 @@ namespace Notification
         }
         #region Sub-Classes
         [Serializable]
+       
         public class NoticeBindinglist : BindingList<Notice>
         {
             public NoticeBindinglist() { this.AllowEdit = AllowNew = AllowRemove = true; }
@@ -196,8 +200,9 @@ namespace Notification
             {
                 this.IsExpirable = false;
                 this.Expires = DateTime.Now.AddMonths(12);
-                Guid = System.Guid.NewGuid().ToString();
-                NoticeControlNumber = Name = Data = "";
+                this.Guid = System.Guid.NewGuid().ToString();
+                this.NoticeControlNumber = "";               
+                this.Data = "";
                 this.EmailAddress = new EmailAddress();
                 this.EmailAddress.Name = "null.null";
                 this.EmailAddress.Email = "null@null.null";
@@ -217,7 +222,9 @@ namespace Notification
                 this.Expires = DateTime.Now.AddMonths(12);
                 if (noticeAction!=null)NoticeAction = noticeAction;
                 Guid = System.Guid.NewGuid().ToString();
-                NoticeControlNumber = Name = Data = "";
+                NoticeControlNumber = "";
+                
+                Data = "";
                 this.EmailAddress = new EmailAddress();
                 this.EmailAddress.Name = "null.null";
                 this.EmailAddress.Email = "null@null.null";
@@ -232,7 +239,7 @@ namespace Notification
                 this.Expires = DateTime.Now.AddMonths(12);
                 if (noticeAction != null) NoticeAction = noticeAction;
                 Guid = System.Guid.NewGuid().ToString();
-                NoticeControlNumber = Name = Data = "";
+                NoticeControlNumber = "";  Data = "";
                 this.EmailAddress = new EmailAddress();
                 this.EmailAddress.Name = "null.null";
                 this.EmailAddress.Email = "null@null.null";
@@ -247,7 +254,7 @@ namespace Notification
                 this.Expires = DateTime.Now.AddMonths(12);
                 if (noticeAction != null) NoticeAction = noticeAction;
                 Guid = System.Guid.NewGuid().ToString();
-                NoticeControlNumber = Name = Data = "";
+                NoticeControlNumber = "";  Data = "";
                 this.EmailAddress = email;
                 Created = DateTime.Now;
                 Scheduled = sheduledTime;
@@ -261,7 +268,7 @@ namespace Notification
                 if (noticeAction != null) NoticeAction = noticeAction;
                 Guid = System.Guid.NewGuid().ToString();
                 NoticeControlNumber = controlNumber;
-                Name = Data = "";
+                Data = "";
                 this.EmailAddress = email;
                 Created = DateTime.Now;
                 Scheduled = sheduledTime;
@@ -275,7 +282,7 @@ namespace Notification
                 if (noticeAction != null) NoticeAction = noticeAction;
                 Guid = System.Guid.NewGuid().ToString();
                 NoticeControlNumber = controlNumber;
-                Name = "";
+                
                 Data = data;
                this.EmailAddress = email;
                 Created = DateTime.Now;
@@ -283,22 +290,6 @@ namespace Notification
                 IsTimed = true;
                 NoticeType = type;
             }
-            public Notice(DateTime expires, NoticeType type, EmailAddress email, string controlNumber, string data,string name, NoticeActionDelegate noticeAction = null)
-            {
-                this.IsExpirable = false;
-                this.Expires = DateTime.Now.AddMonths(12);
-                if (noticeAction != null) NoticeAction = noticeAction;
-                Guid = System.Guid.NewGuid().ToString();
-                NoticeControlNumber = controlNumber;
-                Name = name;
-                Data = data;
-                this.EmailAddress = email;
-                Created = DateTime.Now;
-                Scheduled = expires;
-                IsTimed = true;
-                NoticeType = type;
-            }
-
             public static Notice Load(string guid)
             {
                 return Web_App_Master.Load.Notification(guid);
@@ -417,6 +408,7 @@ namespace Notification
             }
             public Exception Exception { get; set; }
         }
+      
         public event EventHandler<ExcpetionEvent> OnException;
         protected  virtual void HandleException(ExcpetionEvent e)
         {

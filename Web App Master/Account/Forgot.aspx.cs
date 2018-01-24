@@ -31,7 +31,7 @@ namespace Web_App_Master.Account
                 // Send email with the code and the redirect to reset password page
                 string code = manager.GeneratePasswordResetToken(user.Id);
                 string callbackUrl = IdentityHelper.GetResetPasswordRedirectUrl(code, Request);
-                EmailHelper.SendEmailNoticeAsync(user.Email, "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>.","Reset Password");
+                EmailHelper.SendEmailAsync(user.Email, "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>.","Reset Password");
                 //manager.SendEmail(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>.");
                 loginForm.Visible = false;
                 DisplayEmail.Visible = true;

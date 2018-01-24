@@ -59,6 +59,7 @@ namespace Data
             Log = new List<LogEntry>();
             Notices = new List<Notice>();
             Attachments = new List<Attachment>();
+            IsAutoChecked = false;
         }
         [XmlElement]
         public string m_guid = System.Guid.NewGuid().ToString();
@@ -69,12 +70,15 @@ namespace Data
        
         [XmlElement]
         public string Email { get; set; }
+        
         [XmlElement]
         public List<LogEntry> Log { get; set; }
         [XmlElement]
         public List<Notice> Notices { get; set; }
         [XmlElement]
         public List<Attachment> Attachments { get; set; }
+        [XmlElement]
+        public bool IsAutoChecked { get; set; }
 
         public object Clone()
         {
