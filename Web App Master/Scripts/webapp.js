@@ -2,6 +2,7 @@
 document.currentAsset = "0000";
 document.currentBarcodeSequence = "";
 document.lastKeypress = new Date();
+//document.IsAvUp = false;
 var Monitor = function (e) {
     //technically a logger but we will not store all strokes...just capture superfast input and escape key
 
@@ -85,6 +86,11 @@ var Monitor = function (e) {
         hideMetroCharm('#assets');
         hideMetroCharm('#settings-charm');
         hideMetroCharm('#assetview-charm');
+        //hideMetroCharm('#AlertCharm');
+        $('#ErrorBox').removeClass('open-error');
+        $('#asset-modal').hide();
+        window.sessionStorage.setItem("IsAvUp", "false");
+        document.IsAvUp = false;
         HideLoader();
        
     }
@@ -167,6 +173,7 @@ $(document).ready(function () {
     // define our variables
     var fullHeightMinusHeader, sideScrollHeight = 0;
 
+
     // create function to calculate ideal height values
     function calcHeights() {
         try {
@@ -179,7 +186,7 @@ $(document).ready(function () {
             jQuery(".side-scroll").height(sideScrollHeight);
         } catch (err) { }
         try { SetAssetViewHeight(); } catch (er) { }
-        
+        try { ResizeAssetReport(); } catch (er) { }
     } // end calcHeights function
 
     // run on page load    
@@ -191,8 +198,66 @@ $(document).ready(function () {
     });
     HideLoader();
 
-});
+    var isAvUp = window.sessionStorage.getItem("IsAvUp");
+    if (isAvUp == "true")
+    {
+       var temp = window.sessionStorage.getItem('Asset');
+       var asset = $.parseJSON(temp);
+       
+        LoadAsset(asset);
+    } else
+    {
+     
+        HideAssetModal();
+    }
 
+});
+function openPage(pageName, elmnt, color) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablink");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].style.backgroundColor = "";
+    }
+    try {
+        document.getElementById(pageName).style.display = "block";
+        window.sessionStorage.setItem("currrentTab", pageName);
+    } catch (er) { }
+    //elmnt.style.backgroundColor = color;
+
+}
+function HideAssetModal() {
+    window.sessionStorage.setItem("IsAvUp", "false");
+    document.IsAvUp = false;
+    //$('#asset-modal').removeClass('open-asset');
+    $('#asset-modal').hide();
+}
+function ShowAssetModal() {   
+    window.sessionStorage.setItem("IsAvUp", "true");
+    $('#asset-modal').show();
+    //$('#asset-modal').addClass('open-asset');
+    var currentTab = window.sessionStorage.getItem("currrentTab");
+    if (currentTab !== null)
+    {
+        openPage(currentTab, this, 'red');
+        if (currentTab == "ReportTab")
+        {
+            ShowAssetFrames();
+            ResizeAssetReport();
+        }
+    } else {
+        $("#AssetTab-btn").click();
+    }
+    
+    return false;
+}
+function ToggleError()
+{
+    $('#ErrorBox').toggleClass('open-error');
+}
 function TimedKeyUp() {
     keys[lastkey] = false;
 
@@ -314,6 +379,7 @@ function AssetSuccess(msg) {
         NAME.className = "glyphicon glyphicon-barcode";   // Set other class name
     }
     document.ASSET = msg.d;
+    window.sessionStorage.setItem("Asset", JSON.stringify(msg.d));
     var tmp = $("#BarcodeCheckBox").prop('checked');
     if (tmp === true)
     {
@@ -326,6 +392,7 @@ function AssetSuccess(msg) {
        
     } else {
         SetAutoCheck('false');
+        $("#AssetTab-btn").click();
          LoadAsset(msg.d);
     }
    
@@ -365,12 +432,12 @@ function Quiet(id)
 }
 function LoadAsset(asset) {
     try {
-       
+        
         try {
             BindAssetHistory();
             BindAssetCalibration();
             HideAllFrames();
-            //$("#IsAvUp").html("true");
+          
         } catch (erx1) { }
         var a = $("#av_imgidx").val("0");
         var a2 = $("#av_imgs").val(asset.Images);
@@ -473,8 +540,11 @@ function LoadAsset(asset) {
             $("#av-CalibratedTool").prop('checked', false);
         }
         $("#av-CalibratedTool").attr("onclick", "AssetIsCalibrated('" + asset.AssetNumber + "')");
-       
-        showMetroCharm('#assetview-charm');
+        window.sessionStorage.setItem("IsAvUp", "true");
+        window.sessionStorage.setItem("AssetNumber", asset.AssetNumber);
+        document.IsAvUp = true;
+        ShowAssetModal();
+      
         
     } catch (err) { }
 }
@@ -497,7 +567,7 @@ function ResizeAssetReport() {
 function SetAssetViewHeight() {
     try { var newHeight = 0;
     var myViewHeight = jQuery(".main-content").height();
-    newHeight = myViewHeight - 178;
+    newHeight = myViewHeight - 183;
     var a = $("#AssetImageDiv").height();
     $("#AssetImageDiv").height(newHeight);
     $("#AssetCalibrationDiv").height(newHeight-25);

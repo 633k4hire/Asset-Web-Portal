@@ -7,11 +7,13 @@
         <div class="bg"></div>
     
     <div class="jumbotron">
-        <h1>Asset Web Portal</h1>
+        <h1><span onclick="ShowAssetModal();">Asset Web Portal</span></h1>
         <p class="lead"  style="z-index:400;"><b> Asset Tracking and Deployment System</b></p>
     </div>
     
-    <script>
+   
+    
+<!-- <script>
         $(function(){
             var checks = $("input:radio");
             var lv = $("#lv1");
@@ -23,9 +25,7 @@
                 }
             });
         });
-    </script>
-    
-<!-- <div class="row">
+    </script> <div class="row">
     <div class="col-md-12">
 
         <div class="awp_box rounded bg-metro-dark shadow">

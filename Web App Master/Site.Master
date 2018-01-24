@@ -289,24 +289,27 @@
 </div>
 	</div>
 <!--End Side Task Bar -->
-<!--Asset Charm-->
-    <div data-role="charm" data-position="right" id="assetview-charm" class="charm right-side bg-metro-dark" style="opacity: 1; display: block; right: 0px; left: auto; top: 50px; bottom: 0px; min-width:100%; width:100%; z-index:89999" >
-<!--ASSET MENU--><span class="charm-closer" onclick="hideMetroCharm('#assetview-charm');"></span>
-        <div id ="AssetHeader" class="app-bar bg-metro-dark shadow-bottom " style="margin-top:0px !important;">    
-            <ul class="app-bar-menu">
-                <li><span class="awp-add-btn bg-green shadow" id="InOutBtn"><span id="awp-inner-btn"><i title="Add To Task List" class="glyphicon glyphicon-plus"></i></span></span></li>
-                <li>&nbsp</li>
-                <li><h1><span id="AssetViewHeaderLabel" class="shadow-metro-black"></span></h1></li>
-            </ul>
-        </div>
-<!--TABS-->
-       <div class="tabs  bg-metro">
-<!--Asset Tab-->
-           <div class="tab">
-               <input onclick="HideAllFrames();" type="radio" id="tab-1" name="tab-group-1" checked>
-               <label for="tab-1">Asset</label>       
-               <div id="AssetTab" class="content ShowScroll bg-metro">
-                   <div class="row">
+
+<!--Asset-Modal-->
+     <div id="asset-modal" >
+ <span class="modal-closer" onclick="HideAssetModal()"><span class="mif-cross"></span></span>
+        <div id="asset-modal-content" class=" bg-metro"">
+           <div id ="AssetHeader" class="app-bar bg-metro-dark shadow-bottom " style="margin-top:0px !important;">    
+                <ul class="app-bar-menu">
+                    <li><span class="awp-add-btn bg-green shadow" id="InOutBtn"><span id="awp-inner-btn"><i title="Add To Task List" class="glyphicon glyphicon-plus"></i></span></span></li>
+                    <li>&nbsp</li>
+                    <li><h1><span id="AssetViewHeaderLabel" class="shadow-metro-black"></span></h1></li>
+                </ul>
+            </div>
+
+            <span id="AssetTab-btn" class="tablink" onclick="HideAllFrames(); openPage('AssetTab', this, 'red')">Asset</span>
+            <span id="ImagesTab-btn" class="tablink" onclick="HideAllFrames(); openPage('ImagesTab', this, 'green')">Images</span>
+            <span id="ReportTab-btn" class="tablink" onclick="openPage('ReportTab', this, 'blue'); ShowAssetFrames(); ResizeAssetReport();">Reports</span>
+            <span id="CalibrationTab-btn" class="tablink" onclick="HideAllFrames(); openPage('CalibrationTab', this, 'orange')">Calibration</span>
+            <span id="HistoryTab-btn" class="tablink" onclick="HideAllFrames(); openPage('HistoryTab', this, 'orange')">History</span>
+               
+                <div id="AssetTab" class="tabcontent bg-metro ShowScroll">
+                 <div class="row">
                         <div class="col-md-12">
                          <div id="HiddenAssetDiv" style="display:none"><asp:Literal ID="HiddenAssetLabel" runat="server"></asp:Literal> </div>                             
                             <asp:LoginView ID="AssetViewMenuLoginView" runat="server">
@@ -392,28 +395,24 @@
                             </div>
                         </div>
                    </div>
-               </div> 
-           </div>
-<!-- Image Tab-->
-           <div class="tab">
-               <input onclick="HideAllFrames();" type="radio" id="tab-5" name="tab-group-1">
-               <label for="tab-5">Images</label>     
-               <div id="ImageTab" class="content bg-metro" style="margin-bottom:120px !important; text-align:center; border:none !important;">
-                    <div class="col-md-12" style="margin-top:-21px!important; margin-bottom:0px !important;">
-                        <span class="awp-bar ">
-                              <span class="awp-bar-btn bg-green fg-white shadow" onclick="PrevAssetImg()"><i title="Previous" class="mif-previous av-hand-cursor"></i></span>
-                              <span class="awp-bar-btn bg-green fg-white shadow" onclick="NextAssetImg()"><i title="Next" class="mif-next av-hand-cursor"></i></span>
-                        <asp:LoginView runat="server">                            
-                            <RoleGroups>
-                                <asp:RoleGroup Roles="Admins,superadmin">
-                                    <ContentTemplate>
-                                        <span class="awp-bar-btn bg-blue fg-white shadow" onclick="ShowDiv('UploadAssetImage')"><i title="Upload New Image"  style="font-size:1em;" class="mif-file-upload av-hand-cursor"></i></span>
-                                     </ContentTemplate>
-                                </asp:RoleGroup>                                
-                             </RoleGroups>
-                        </asp:LoginView>
-                        </span>
+                </div>
+                <div id="ImagesTab" class="tabcontent bg-metro ShowScroll" > <!--style="margin-bottom:120px !important; text-align:center; border:none !important;"-->
+                    <div class="col-md-12" >
+                       
                         <div class="awp_box rounded bg-metro-dark shadow">
+                             <span class="awp-bar ">
+                                  <span class="awp-bar-btn bg-green fg-white shadow" onclick="PrevAssetImg()"><i title="Previous" class="mif-previous av-hand-cursor"></i></span>
+                                  <span class="awp-bar-btn bg-green fg-white shadow" onclick="NextAssetImg()"><i title="Next" class="mif-next av-hand-cursor"></i></span>
+                                    <asp:LoginView runat="server">                            
+                                        <RoleGroups>
+                                            <asp:RoleGroup Roles="Admins,superadmin">
+                                                <ContentTemplate>
+                                                    <span class="awp-bar-btn bg-blue fg-white shadow" onclick="ShowDiv('UploadAssetImage')"><i title="Upload New Image"  style="font-size:1em;" class="mif-file-upload av-hand-cursor"></i></span>
+                                                 </ContentTemplate>
+                                            </asp:RoleGroup>                                
+                                         </RoleGroups>
+                                    </asp:LoginView>
+                              </span>
                             <div class="awp_box_title bg-metro-dark">
                                <span class="fg-white shadow-metro-black">Images</span>
                             </div>
@@ -425,15 +424,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-               </div> 
-           </div>
-<!-- Reports Tab-->
-           <div class="tab bg-g">
-               <input type="radio" id="tab-2" name="tab-group-1" onclick="HideAllFrames(); ShowAssetFrames();ResizeAssetReport()">
-               <label for="tab-2">Reports & Labels</label>       
-               <div id="ReportTab"  class="content bg-metro ShowScroll">
-                   <div class="row" style="margin-top:-21px!important; margin-bottom:0px !important;" >
+                    </div>                  
+                </div>
+                <div id="ReportTab" class="tabcontent bg-metro ShowScroll">
+                  <div class="row" >
                     <div class="col-md-4" >                       
                         <div class="awp_box rounded bg-metro-dark shadow">
                             <div class="awp_box_title bg-metro-dark">
@@ -475,16 +469,9 @@
                     </div>
 
                    </div>
-               </div> 
-           </div>
-<!-- Calibration Tab-->
-            <div class="tab">
-               <input onclick="HideAllFrames();" type="radio" id="tab-3" name="tab-group-1">
-               <label for="tab-3">Calibration</label>     
-               <div id="CalibrationTab" class="content bg-metro ShowScroll">
-       
-                  
-                    <div class="col-md-9" style="margin-top:-21px!important; margin-bottom:0px !important;">
+                </div>
+                <div id="CalibrationTab" class="tabcontent bg-metro ShowScroll">
+                 <div class="col-md-9" >
                         
                         <div class="awp_box rounded bg-metro-dark shadow">
                             <div class="awp-bar">
@@ -524,10 +511,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3" style="margin-top:-21px!important; margin-bottom:0px !important;">
+                    <div class="col-md-3">
                         
                         <div class="awp_box rounded bg-metro-dark shadow">
-                            <span class="awp-save-btn bg-red fg-white shadow""><asp:LinkButton runat="server" ID="SaveCalOptionsBtn"  OnClick="SaveCalOptionsBtn_Click" ><i  title="Save"  style="font-size:1em;" class=" fg-white glyphicon glyphicon-floppy-disk av-hand-cursor"></i></asp:LinkButton></span>
+                            <div class="awp-bar">
+                                <span class="awp-bar-btn bg-red fg-white shadow"><asp:LinkButton runat="server" ID="SaveCalOptionsBtn"  OnClick="SaveCalOptionsBtn_Click" ><i  title="Save"  style="padding-left:2px; vertical-align:bottom; font-size:1em;" class=" fg-white glyphicon glyphicon-floppy-disk av-hand-cursor"></i></asp:LinkButton></span>
+                            </div>
                             <div class="awp_box_title bg-metro-dark">
                                <span class="fg-white shadow-metro-black">Calibration Options</span>
                             </div>
@@ -540,17 +529,10 @@
                                   </div>
                                 </div>
                             </div>
-                        </div>
-
-               </div> 
-           </div>
-<!-- History Tab-->
-           <div class="tab">
-               <input onclick="HideAllFrames();" type="radio" id="tab-4" name="tab-group-1">
-               <label for="tab-4">History</label>                    
-               <div id="HistoryTab" class="content bg-metro ShowScroll">
-
-                                     <asp:UpdatePanel runat="server" ID="AssetHistoryUpdatePanel" UpdateMode="Conditional" ChildrenAsTriggers="true">
+                     </div>
+                </div>
+                <div id="HistoryTab" class="tabcontent  bg-metro ShowScroll">
+                        <asp:UpdatePanel runat="server" ID="AssetHistoryUpdatePanel" UpdateMode="Conditional" ChildrenAsTriggers="true">
                                         <ContentTemplate>                
                                            <!--REPEATER-->
                                             <div  style="margin-top:-21px!important; margin-bottom:0px !important;">
@@ -566,15 +548,24 @@
                                            <asp:AsyncPostBackTrigger ControlID="HistoryBinderBtn" EventName="Click" />
                                         </Triggers>
                                      </asp:UpdatePanel>
+                </div>
+        </div>
+    </div>
 
-               </div> 
-           </div>
-      </div>
-<!--END TABS-->
-              </div>
-<!--EndAsset Charm-->
+<!--End Asset-Modal-->
+<!--Message Charm-->
+        <div id="ErrorBox" class=" transition-bottom">
+       <span class="modal-closer" onclick="ToggleError()"><span class="mif-cross"></span></span>
+            <div id="error-box-label"><span class="mif-warning mif-2x fg-white shadow-metro-black"></span>
+            <asp:Label Text="" ID="ErrorLabel" ClientIDMode="Static" CssClass="fg-white shadow-metro-black" runat="server" />
+            </div>          
+            <div id="error-box-content">
+                <asp:Label Text="Message" ID="ErrorMessage" ClientIDMode="Static" CssClass="fg-white shadow-metro-black" runat="server" />
+            </div>
+        </div>
+<!--End Message Charm-->
 <!--Super Button & SuperFields-->         
-            <div id="IsAvUp" style="display:none"> </div>
+            <div id="IsAvUp" style="display:none">false</div>
 
             <asp:Button ID="HistoryBinderBtn" runat="server" Text="CLICK ME" OnClick="HistoryBinderBtn_Click" style="display:none" ClientIDMode="Static"/>
            <asp:Button ID="CalibrationBinderBtn" runat="server" Text="CLICK ME" OnClick="CalibrationBinderBtn_Click" style="display:none" ClientIDMode="Static"/>

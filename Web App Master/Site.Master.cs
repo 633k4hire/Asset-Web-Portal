@@ -32,6 +32,13 @@ namespace Web_App_Master
             catch (Exception ex) { UpdateSubscribers(new UpdateRequestEvent(ex)); }
         }
 
+        public void ShowError(string message,string title="")
+        {
+            ErrorLabel.Text = title;
+            ErrorMessage.Text = message;
+            var script = @"$(document).ready(function (){ToggleError();});";
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "testScript", script, true);
+        }
 
         public void UpdateAllPanels()
         {
@@ -414,6 +421,10 @@ namespace Web_App_Master
 
         protected void SaveCalOptionsBtn_Click(object sender, EventArgs e)
         {
+            if(CalPeriod.Value=="" || CalCompany.Value=="")
+            {
+                ShowError("Please fill in Company and Period data...");
+            }
             var asset = Session["Asset"] as Asset;
             asset.CalibrationCompany = CalCompany.Value.Sanitize();
             DateTime tmp = DateTime.Now;
